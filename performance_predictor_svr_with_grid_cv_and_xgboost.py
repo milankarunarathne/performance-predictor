@@ -3,16 +3,9 @@ import pandas as pd
 from sklearn import preprocessing
 from sklearn.svm import SVR
 from xgboost import XGBRegressor
-from sklearn.model_selection import train_test_split
-from sklearn.model_selection import KFold
-from sklearn.model_selection import cross_validate
-from sklearn.model_selection import learning_curve
-from sklearn.model_selection import cross_val_score
-from sklearn.model_selection import cross_val_predict
-from sklearn.model_selection import check_cv
 import sklearn.metrics as mx
 from sklearn.model_selection import GridSearchCV
-from sklearn.model_selection import RandomizedSearchCV
+# from sklearn.model_selection import RandomizedSearchCV
 import time
 
 
@@ -20,7 +13,7 @@ summary_data = 'resources/train/old/wso2apimanagerperformanceresults.csv'
 summary_data_test = 'resources/test/old/wso2apimanagerperformanceresults.csv'
 t_splitter = ","
 
-csv_select_cols = [0, 1, 2, 3, 7, 13, 36, 37, 38]
+csv_select_cols = [0, 1, 2, 3, 7, 10, 11, 12, 13, 36, 37, 38]
 x_select_cols = [0, 1, 2, 3]  # select columns to x (features)
 y_select_col_latency = 4
 y_select_col_90th_percentile = 5
@@ -35,91 +28,10 @@ t_size = 0.0  # percentage for testing (test size)
 n_rows = 117   # total rows
 row_start = 25  # testing rows at start
 r_seed = 42  # seed of random (random seed)
-epsilion_default = 0.01
+kernel_type_array = ['rbf', 'poly', 'linear']
+c_array = [1E-3, 1E-2, 1E-1,1E0, 1E1, 1E2, 1E3, 1E4, 1E5, 1E6, 1E7, 1E8 ]
+epsilion_array = [0.001, 0.5, 0.999, 1.498, 1.997, 2.496, 2.995, 3.494, 3.993, 4.492, 4.991, 5.49, 5.989, 6.488, 6.987, 7.486, 7.985, 8.484, 8.983, 9.482, 9.981]
 gamma_default = 'auto'
-c_defalut = 1e5
-c_s = -3
-c_e = 8
-e_s = 0.001
-e_e = 10
-
-
-arr_rmse = np.array([], dtype='float64')
-# arr_linear_gamma_rmse = np.array([], dtype='float64')
-# arr_linear_epsilion_rmse = np.array([], dtype='float64')
-arr_rmse_test = np.array([], dtype='float64')
-
-arr_mape = np.array([], dtype='float64')
-# arr_linear_gamma_mape = np.array([], dtype='float64')
-# arr_linear_epsilion_mape = np.array([], dtype='float64')
-arr_mape_test = np.array([], dtype='float64')
-
-arr_c_values = np.array([], dtype='float64')
-arr_epsilion_values = np.array([], dtype='float64')
-
-
-# arr_rbf_c_rmse = np.array([], dtype='float64')
-# arr_rbf_gamma_rmse = np.array([], dtype='float64')
-# arr_rbf_epsilion_rmse = np.array([], dtype='float64')
-#
-# arr_rbf_c_mape = np.array([], dtype='float64')
-# arr_rbf_gamma_mape = np.array([], dtype='float64')
-# arr_rbf_epsilion_mape = np.array([], dtype='float64')
-#
-# arr_poly1_c_rmse = np.array([], dtype='float64')
-# arr_poly1_gamma_rmse = np.array([], dtype='float64')
-# arr_poly1_epsilion_rmse = np.array([], dtype='float64')
-#
-# arr_poly1_c_mape = np.array([], dtype='float64')
-# arr_poly1_gamma_mape = np.array([], dtype='float64')
-# arr_poly1_epsilion_mape = np.array([], dtype='float64')
-#
-# arr_poly2_c_rmse = np.array([], dtype='float64')
-# arr_poly2_gamma_rmse = np.array([], dtype='float64')
-# arr_poly2_epsilion_rmse = np.array([], dtype='float64')
-#
-# arr_poly2_c_mape = np.array([], dtype='float64')
-# arr_poly2_gamma_mape = np.array([], dtype='float64')
-# arr_poly2_epsilion_mape = np.array([], dtype='float64')
-#
-# arr_poly3_c_rmse = np.array([], dtype='float64')
-# arr_poly3_gamma_rmse = np.array([], dtype='float64')
-# arr_poly3_epsilion_rmse = np.array([], dtype='float64')
-#
-# arr_poly3_c_mape = np.array([], dtype='float64')
-# arr_poly3_gamma_mape = np.array([], dtype='float64')
-# arr_poly3_epsilion_mape = np.array([], dtype='float64')
-#
-# arr_poly4_c_rmse = np.array([], dtype='float64')
-# arr_poly4_gamma_rmse = np.array([], dtype='float64')
-# arr_poly4_epsilion_rmse = np.array([], dtype='float64')
-#
-# arr_poly4_c_mape = np.array([], dtype='float64')
-# arr_poly4_gamma_mape = np.array([], dtype='float64')
-# arr_poly4_epsilion_mape = np.array([], dtype='float64')
-#
-# arr_poly5_c_rmse = np.array([], dtype='float64')
-# arr_poly5_gamma_rmse = np.array([], dtype='float64')
-# arr_poly5_epsilion_rmse = np.array([], dtype='float64')
-#
-# arr_poly5_c_mape = np.array([], dtype='float64')
-# arr_poly5_gamma_mape = np.array([], dtype='float64')
-# arr_poly5_epsilion_mape = np.array([], dtype='float64')
-#
-# arr_poly6_c_rmse = np.array([], dtype='float64')
-# arr_poly6_gamma_rmse = np.array([], dtype='float64')
-# arr_poly6_epsilion_rmse = np.array([], dtype='float64')
-#
-# arr_poly6_c_mape = np.array([], dtype='float64')
-# arr_poly6_gamma_mape = np.array([], dtype='float64')
-# arr_poly6_epsilion_mape = np.array([], dtype='float64')
-#
-# arr_xgboost_rmse = np.array([], dtype='float64')
-# arr_xgboost_mape = np.array([], dtype='float64')
-# #
-# # arr_xgboost_c_mape = np.array([], dtype='float64')
-# # arr_xgboost_gamma_mape = np.array([], dtype='float64')
-# # arr_xgboost_epsilion_mape = np.array([], dtype='float64')
 
 
 def data_reader(csv_file, total_row, thousands_splitter, csv_select_columns, x_column_numbers, y_column_number):
@@ -172,40 +84,31 @@ def evaluator(y_train_ev, y_pred_ev):
     return confidence_rmse, confidence_mape
 
 
-# def less_error_value_finder(array_val, best_para, hypr_para):
-#     if len(array_val) < 2:
-#         return best_para
-#     elif array_val[len(array_val)-2] > array_val[len(array_val)-1]:
-#         best_para = hypr_para
-#         return best_para
-#     else:
-#         return best_para
-
-
 def array_print(array_get):
     for i in range(0, len(array_get)):
         print array_get[i]
     print "okay"
 
 
+time1 = time.time()
 time2 = time.time()
 # ###################################################################################
 # throughput
-
-print target
+print "\n\n\nThroughput "
 
 data_split_throughput = np.array([], dtype='float64')
 data_split_throughput = data_reader(csv_file=summary_data, total_row=n_rows,
                                     thousands_splitter=t_splitter, csv_select_columns=csv_select_cols,
-                                    x_column_numbers=x_select_cols, y_column_number=target)
+                                    x_column_numbers=x_select_cols, y_column_number=y_select_col_throughput)
 
 data_split_throughput_test = np.array([], dtype='float64')
 data_split_throughput_test = data_reader(csv_file=summary_data_test, total_row=n_rows, thousands_splitter=t_splitter,
                                          csv_select_columns=csv_select_cols, x_column_numbers=x_select_cols,
-                                         y_column_number=target)
+                                         y_column_number=y_select_col_throughput)
 
-# SVR Grid Search
-parameters = {'kernel': ['rbf', 'poly', 'linear'], 'C': [1E-3, 1E-2, 1E-1, 1E0, 1E1, 1E2, 1E3, 1E4, 1E5, 1E6, 1E7, 1E8], 'epsilon': [0.001, 0.5, 0.999, 1.498, 1.997, 2.496, 2.995, 3.494, 3.993, 4.492, 4.991, 5.49, 5.989, 6.488, 6.987, 7.486, 7.985, 8.484, 8.983, 9.482, 9.981]}
+#  ##################################################################################
+print "\n\n\nSVR Grid Search CV "
+parameters = {'kernel': kernel_type_array, 'C': c_array, 'epsilon': epsilion_array}
 svr = SVR()
 svr_model = GridSearchCV(svr, parameters)
 svr_model.fit(data_split_throughput[0], data_split_throughput[1])
@@ -229,6 +132,7 @@ current_result_array_test = evaluator(y_train_ev=data_split_throughput_test[1], 
 arr_rmse_in_test = current_result_array_test[0]
 arr_mape_in_test = current_result_array_test[1]
 # #############################################################################
+print "\n\n\nresults "
 print "rmse"
 print arr_rmse_in
 print "mape"
@@ -241,7 +145,8 @@ print arr_mape_in_test
 print svr_model.best_params_
 
 print 'time', time.time()-time2
-
+# #############################################################################
+print "\n\n\nXGBoost "
 xgb_model = XGBRegressor()  # not parameters for tune
 xgb_model.fit(data_split_throughput[0], data_split_throughput[1])
 y_prd = xgb_model.predict(data_split_throughput[0])
@@ -260,6 +165,7 @@ arr_mape_in_xg = current_result_array[1]
 current_result_array_test = evaluator(y_train_ev=data_split_throughput_test[1], y_pred_ev=y_prd_test)
 arr_rmse_in_test_xg = current_result_array_test[0]
 arr_mape_in_test_xg = current_result_array_test[1]
+# #################################################################################
 
 print "rmse xg"
 print arr_rmse_in_xg
@@ -270,5 +176,635 @@ print arr_rmse_in_test_xg
 print "test mape xg"
 print arr_mape_in_test_xg
 
+print (time.time()-time2)
+
+
+time2 = time.time()
+# ###################################################################################
+# latency
+print "\n\n\nLatency "
+
+data_split_latency = np.array([], dtype='float64')
+data_split_latency = data_reader(csv_file=summary_data, total_row=n_rows,
+                                    thousands_splitter=t_splitter, csv_select_columns=csv_select_cols,
+                                    x_column_numbers=x_select_cols, y_column_number=y_select_col_latency)
+
+data_split_latency_test = np.array([], dtype='float64')
+data_split_latency_test = data_reader(csv_file=summary_data_test, total_row=n_rows, thousands_splitter=t_splitter,
+                                         csv_select_columns=csv_select_cols, x_column_numbers=x_select_cols,
+                                         y_column_number=y_select_col_latency)
+
+#  ##################################################################################
+# SVR Grid Search to latency
+print "\n\n\nSVR Grid Search CV "
+parameters = {'kernel': kernel_type_array , 'C': c_array, 'epsilon': epsilion_array}
+svr = SVR()
+svr_model = GridSearchCV(svr, parameters)
+svr_model.fit(data_split_latency[0], data_split_latency[1])
+y_prd = svr_model.predict(data_split_latency[0])
+print 'train data'
+print array_print(data_split_latency[1])
+print 'train pred'
+print array_print(y_prd)
+y_prd_test = svr_model.predict(data_split_latency_test[0])  # predict y values by train x_train
+print 'test data'
+print array_print(data_split_latency_test[1])
+print 'test pred data'
+print array_print(y_prd_test)
+print svr_model
+y_prd = svr_model.predict(data_split_latency[0])
+y_prd_test = svr_model.predict(data_split_latency_test[0])  # predict y values by train x_train
+current_result_array = evaluator(y_train_ev=data_split_latency[1], y_pred_ev=y_prd)
+arr_rmse_in = current_result_array[0]
+arr_mape_in = current_result_array[1]
+current_result_array_test = evaluator(y_train_ev=data_split_latency_test[1], y_pred_ev=y_prd_test)
+arr_rmse_in_test = current_result_array_test[0]
+arr_mape_in_test = current_result_array_test[1]
+# #############################################################################
+print "\n\n\nresults "
+print "rmse"
+print arr_rmse_in
+print "mape"
+print arr_mape_in
+print "test rmse"
+print arr_rmse_in_test
+print "test mape"
+print arr_mape_in_test
+
+print svr_model.best_params_
+
+print 'time', time.time()-time2
+
+# ######################################################################################
+print "\n\n\nXGBoost "
+xgb_model = XGBRegressor()  # not parameters for tune
+xgb_model.fit(data_split_latency[0], data_split_latency[1])
+y_prd = xgb_model.predict(data_split_latency[0])
+print 'train data'
+print array_print(data_split_latency[1])
+print 'train pred'
+print array_print(y_prd)
+y_prd_test = xgb_model.predict(data_split_latency_test[0])  # predict y values by train x_train
+print 'test data'
+print array_print(data_split_latency_test[1])
+print 'test pred data'
+print array_print(y_prd_test)
+current_result_array = evaluator(y_train_ev=data_split_latency[1], y_pred_ev=y_prd)
+arr_rmse_in_xg = current_result_array[0]
+arr_mape_in_xg = current_result_array[1]
+current_result_array_test = evaluator(y_train_ev=data_split_latency_test[1], y_pred_ev=y_prd_test)
+arr_rmse_in_test_xg = current_result_array_test[0]
+arr_mape_in_test_xg = current_result_array_test[1]
+
+# ########################################################################
+print "\n\n\nresults "
+
+print "rmse xg"
+print arr_rmse_in_xg
+print "mape xg"
+print arr_mape_in_xg
+print "test rmse xg"
+print arr_rmse_in_test_xg
+print "test mape xg"
+print arr_mape_in_test_xg
 
 print (time.time()-time2)
+
+
+time2 = time.time()
+# ###################################################################################
+# 90th percentile
+print "\n\n\n90th percentile "
+
+data_split_90th_percentile = np.array([], dtype='float64')
+data_split_90th_percentile = data_reader(csv_file=summary_data, total_row=n_rows,
+                                    thousands_splitter=t_splitter, csv_select_columns=csv_select_cols,
+                                    x_column_numbers=x_select_cols, y_column_number=y_select_col_90th_percentile)
+
+data_split_90th_percentile_test = np.array([], dtype='float64')
+data_split_90th_percentile_test = data_reader(csv_file=summary_data_test, total_row=n_rows, thousands_splitter=t_splitter,
+                                         csv_select_columns=csv_select_cols, x_column_numbers=x_select_cols,
+                                         y_column_number=y_select_col_90th_percentile)
+
+#  ##################################################################################
+# SVR Grid Search to 90th percentile
+print "\n\n\nSVR Grid Search CV "
+parameters = {'kernel': kernel_type_array , 'C': c_array, 'epsilon': epsilion_array}
+svr = SVR()
+svr_model = GridSearchCV(svr, parameters)
+svr_model.fit(data_split_90th_percentile[0], data_split_90th_percentile[1])
+y_prd = svr_model.predict(data_split_90th_percentile[0])
+print 'train data'
+print array_print(data_split_90th_percentile[1])
+print 'train pred'
+print array_print(y_prd)
+y_prd_test = svr_model.predict(data_split_90th_percentile_test[0])  # predict y values by train x_train
+print 'test data'
+print array_print(data_split_90th_percentile_test[1])
+print 'test pred data'
+print array_print(y_prd_test)
+print svr_model
+y_prd = svr_model.predict(data_split_90th_percentile[0])
+y_prd_test = svr_model.predict(data_split_90th_percentile_test[0])  # predict y values by train x_train
+current_result_array = evaluator(y_train_ev=data_split_90th_percentile[1], y_pred_ev=y_prd)
+arr_rmse_in = current_result_array[0]
+arr_mape_in = current_result_array[1]
+current_result_array_test = evaluator(y_train_ev=data_split_90th_percentile_test[1], y_pred_ev=y_prd_test)
+arr_rmse_in_test = current_result_array_test[0]
+arr_mape_in_test = current_result_array_test[1]
+# #############################################################################
+print "\n\n\nresults "
+
+print "rmse"
+print arr_rmse_in
+print "mape"
+print arr_mape_in
+print "test rmse"
+print arr_rmse_in_test
+print "test mape"
+print arr_mape_in_test
+
+print svr_model.best_params_
+
+print 'time', time.time()-time2
+
+# ####################################################################################
+print "\n\n\nXGBoost "
+xgb_model = XGBRegressor()  # not parameters for tune
+xgb_model.fit(data_split_90th_percentile[0], data_split_90th_percentile[1])
+y_prd = xgb_model.predict(data_split_90th_percentile[0])
+print 'train data'
+print array_print(data_split_90th_percentile[1])
+print 'train pred'
+print array_print(y_prd)
+y_prd_test = xgb_model.predict(data_split_90th_percentile_test[0])  # predict y values by train x_train
+print 'test data'
+print array_print(data_split_90th_percentile_test[1])
+print 'test pred data'
+print array_print(y_prd_test)
+current_result_array = evaluator(y_train_ev=data_split_90th_percentile[1], y_pred_ev=y_prd)
+arr_rmse_in_xg = current_result_array[0]
+arr_mape_in_xg = current_result_array[1]
+current_result_array_test = evaluator(y_train_ev=data_split_90th_percentile_test[1], y_pred_ev=y_prd_test)
+arr_rmse_in_test_xg = current_result_array_test[0]
+arr_mape_in_test_xg = current_result_array_test[1]
+# ################################################################################
+print "\n\n\nresults "
+
+print "rmse xg"
+print arr_rmse_in_xg
+print "mape xg"
+print arr_mape_in_xg
+print "test rmse xg"
+print arr_rmse_in_test_xg
+print "test mape xg"
+print arr_mape_in_test_xg
+
+print (time.time()-time2)
+
+
+time2 = time.time()
+# ###################################################################################
+# 95th percentile
+print "\n\n\n95th percentile "
+
+data_split_95th_percentile = np.array([], dtype='float64')
+data_split_95th_percentile = data_reader(csv_file=summary_data, total_row=n_rows,
+                                    thousands_splitter=t_splitter, csv_select_columns=csv_select_cols,
+                                    x_column_numbers=x_select_cols, y_column_number=y_select_col_95th_percentile)
+
+data_split_95th_percentile_test = np.array([], dtype='float64')
+data_split_95th_percentile_test = data_reader(csv_file=summary_data_test, total_row=n_rows, thousands_splitter=t_splitter,
+                                         csv_select_columns=csv_select_cols, x_column_numbers=x_select_cols,
+                                         y_column_number=y_select_col_95th_percentile)
+
+#  ##################################################################################
+# SVR Grid Search to 95th percentile
+print "\n\n\nSVR Grid Search CV "
+parameters = {'kernel': kernel_type_array , 'C': c_array, 'epsilon': epsilion_array}
+svr = SVR()
+svr_model = GridSearchCV(svr, parameters)
+svr_model.fit(data_split_95th_percentile[0], data_split_95th_percentile[1])
+y_prd = svr_model.predict(data_split_95th_percentile[0])
+print 'train data'
+print array_print(data_split_95th_percentile[1])
+print 'train pred'
+print array_print(y_prd)
+y_prd_test = svr_model.predict(data_split_95th_percentile_test[0])  # predict y values by train x_train
+print 'test data'
+print array_print(data_split_95th_percentile_test[1])
+print 'test pred data'
+print array_print(y_prd_test)
+print svr_model
+y_prd = svr_model.predict(data_split_95th_percentile[0])
+y_prd_test = svr_model.predict(data_split_95th_percentile_test[0])  # predict y values by train x_train
+current_result_array = evaluator(y_train_ev=data_split_95th_percentile[1], y_pred_ev=y_prd)
+arr_rmse_in = current_result_array[0]
+arr_mape_in = current_result_array[1]
+current_result_array_test = evaluator(y_train_ev=data_split_95th_percentile_test[1], y_pred_ev=y_prd_test)
+arr_rmse_in_test = current_result_array_test[0]
+arr_mape_in_test = current_result_array_test[1]
+# #############################################################################
+print "\n\n\nresults "
+print "rmse"
+print arr_rmse_in
+print "mape"
+print arr_mape_in
+print "test rmse"
+print arr_rmse_in_test
+print "test mape"
+print arr_mape_in_test
+
+print svr_model.best_params_
+
+print 'time', time.time()-time2
+# #############################################################################################
+print "\n\n\nXGBoost "
+xgb_model = XGBRegressor()  # not parameters for tune
+xgb_model.fit(data_split_95th_percentile[0], data_split_95th_percentile[1])
+y_prd = xgb_model.predict(data_split_95th_percentile[0])
+print 'train data'
+print array_print(data_split_95th_percentile[1])
+print 'train pred'
+print array_print(y_prd)
+y_prd_test = xgb_model.predict(data_split_95th_percentile_test[0])  # predict y values by train x_train
+print 'test data'
+print array_print(data_split_95th_percentile_test[1])
+print 'test pred data'
+print array_print(y_prd_test)
+current_result_array = evaluator(y_train_ev=data_split_95th_percentile[1], y_pred_ev=y_prd)
+arr_rmse_in_xg = current_result_array[0]
+arr_mape_in_xg = current_result_array[1]
+current_result_array_test = evaluator(y_train_ev=data_split_95th_percentile_test[1], y_pred_ev=y_prd_test)
+arr_rmse_in_test_xg = current_result_array_test[0]
+arr_mape_in_test_xg = current_result_array_test[1]
+# ####################################################################################
+print "\n\n\nresults "
+print "rmse xg"
+print arr_rmse_in_xg
+print "mape xg"
+print arr_mape_in_xg
+print "test rmse xg"
+print arr_rmse_in_test_xg
+print "test mape xg"
+print arr_mape_in_test_xg
+
+print (time.time()-time2)
+
+
+time2 = time.time()
+# ###################################################################################
+# 99th_percentile
+print "\n\n\n99th_percentile "
+
+data_split_99th_percentile = np.array([], dtype='float64')
+data_split_99th_percentile = data_reader(csv_file=summary_data, total_row=n_rows,
+                                    thousands_splitter=t_splitter, csv_select_columns=csv_select_cols,
+                                    x_column_numbers=x_select_cols, y_column_number=y_select_col_99th_percentile)
+
+data_split_99th_percentile_test = np.array([], dtype='float64')
+data_split_99th_percentile_test = data_reader(csv_file=summary_data_test, total_row=n_rows, thousands_splitter=t_splitter,
+                                         csv_select_columns=csv_select_cols, x_column_numbers=x_select_cols,
+                                         y_column_number=y_select_col_99th_percentile)
+
+#  ##################################################################################
+# SVR Grid Search to 99th_percentile
+print "\n\n\nSVR Grid Search CV "
+parameters = {'kernel': kernel_type_array , 'C': c_array, 'epsilon': epsilion_array}
+svr = SVR()
+svr_model = GridSearchCV(svr, parameters)
+svr_model.fit(data_split_99th_percentile[0], data_split_99th_percentile[1])
+y_prd = svr_model.predict(data_split_99th_percentile[0])
+print 'train data'
+print array_print(data_split_99th_percentile[1])
+print 'train pred'
+print array_print(y_prd)
+y_prd_test = svr_model.predict(data_split_99th_percentile_test[0])  # predict y values by train x_train
+print 'test data'
+print array_print(data_split_99th_percentile_test[1])
+print 'test pred data'
+print array_print(y_prd_test)
+print svr_model
+y_prd = svr_model.predict(data_split_99th_percentile[0])
+y_prd_test = svr_model.predict(data_split_99th_percentile_test[0])  # predict y values by train x_train
+current_result_array = evaluator(y_train_ev=data_split_99th_percentile[1], y_pred_ev=y_prd)
+arr_rmse_in = current_result_array[0]
+arr_mape_in = current_result_array[1]
+current_result_array_test = evaluator(y_train_ev=data_split_99th_percentile_test[1], y_pred_ev=y_prd_test)
+arr_rmse_in_test = current_result_array_test[0]
+arr_mape_in_test = current_result_array_test[1]
+# #######################################################################################
+print "\n\n\nresults "
+print "rmse"
+print arr_rmse_in
+print "mape"
+print arr_mape_in
+print "test rmse"
+print arr_rmse_in_test
+print "test mape"
+print arr_mape_in_test
+
+print svr_model.best_params_
+
+print 'time', time.time()-time2
+# #######################################################################################
+print "\n\n\nXGBoost "
+xgb_model = XGBRegressor()  # not parameters for tune
+xgb_model.fit(data_split_99th_percentile[0], data_split_99th_percentile[1])
+y_prd = xgb_model.predict(data_split_99th_percentile[0])
+print 'train data'
+print array_print(data_split_99th_percentile[1])
+print 'train pred'
+print array_print(y_prd)
+y_prd_test = xgb_model.predict(data_split_99th_percentile_test[0])  # predict y values by train x_train
+print 'test data'
+print array_print(data_split_99th_percentile_test[1])
+print 'test pred data'
+print array_print(y_prd_test)
+current_result_array = evaluator(y_train_ev=data_split_99th_percentile[1], y_pred_ev=y_prd)
+arr_rmse_in_xg = current_result_array[0]
+arr_mape_in_xg = current_result_array[1]
+current_result_array_test = evaluator(y_train_ev=data_split_99th_percentile_test[1], y_pred_ev=y_prd_test)
+arr_rmse_in_test_xg = current_result_array_test[0]
+arr_mape_in_test_xg = current_result_array_test[1]
+# ##################################################################################
+print "\n\n\nresults "
+print "rmse xg"
+print arr_rmse_in_xg
+print "mape xg"
+print arr_mape_in_xg
+print "test rmse xg"
+print arr_rmse_in_test_xg
+print "test mape xg"
+print arr_mape_in_test_xg
+
+print (time.time()-time2)
+
+
+time2 = time.time()
+# ###################################################################################
+# load_average_1_minute
+print "\n\n\nload_average_1_minute "
+
+data_split_load_average_1_minute = np.array([], dtype='float64')
+data_split_load_average_1_minute = data_reader(csv_file=summary_data, total_row=n_rows,
+                                    thousands_splitter=t_splitter, csv_select_columns=csv_select_cols,
+                                    x_column_numbers=x_select_cols, y_column_number=y_select_col_load_average_1_minute)
+
+data_split_load_average_1_minute_test = np.array([], dtype='float64')
+data_split_load_average_1_minute_test = data_reader(csv_file=summary_data_test, total_row=n_rows, thousands_splitter=t_splitter,
+                                         csv_select_columns=csv_select_cols, x_column_numbers=x_select_cols,
+                                         y_column_number=y_select_col_load_average_1_minute)
+
+#  ##################################################################################
+# SVR Grid Search to load_average_1_minute
+print "\n\n\nSVR Grid Search CV "
+parameters = {'kernel': kernel_type_array , 'C': c_array, 'epsilon': epsilion_array}
+svr = SVR()
+svr_model = GridSearchCV(svr, parameters)
+svr_model.fit(data_split_load_average_1_minute[0], data_split_load_average_1_minute[1])
+y_prd = svr_model.predict(data_split_load_average_1_minute[0])
+print 'train data'
+print array_print(data_split_load_average_1_minute[1])
+print 'train pred'
+print array_print(y_prd)
+y_prd_test = svr_model.predict(data_split_load_average_1_minute_test[0])  # predict y values by train x_train
+print 'test data'
+print array_print(data_split_load_average_1_minute_test[1])
+print 'test pred data'
+print array_print(y_prd_test)
+print svr_model
+y_prd = svr_model.predict(data_split_load_average_1_minute[0])
+y_prd_test = svr_model.predict(data_split_load_average_1_minute_test[0])  # predict y values by train x_train
+current_result_array = evaluator(y_train_ev=data_split_load_average_1_minute[1], y_pred_ev=y_prd)
+arr_rmse_in = current_result_array[0]
+arr_mape_in = current_result_array[1]
+current_result_array_test = evaluator(y_train_ev=data_split_load_average_1_minute_test[1], y_pred_ev=y_prd_test)
+arr_rmse_in_test = current_result_array_test[0]
+arr_mape_in_test = current_result_array_test[1]
+# #############################################################################
+print "\n\n\nresults "
+print "rmse"
+print arr_rmse_in
+print "mape"
+print arr_mape_in
+print "test rmse"
+print arr_rmse_in_test
+print "test mape"
+print arr_mape_in_test
+
+print svr_model.best_params_
+
+print 'time', time.time()-time2
+# ##################################################################################
+print "\n\n\nXGBoost "
+xgb_model = XGBRegressor()  # not parameters for tune
+xgb_model.fit(data_split_load_average_1_minute[0], data_split_load_average_1_minute[1])
+y_prd = xgb_model.predict(data_split_load_average_1_minute[0])
+print 'train data'
+print array_print(data_split_load_average_1_minute[1])
+print 'train pred'
+print array_print(y_prd)
+y_prd_test = xgb_model.predict(data_split_load_average_1_minute_test[0])  # predict y values by train x_train
+print 'test data'
+print array_print(data_split_load_average_1_minute_test[1])
+print 'test pred data'
+print array_print(y_prd_test)
+current_result_array = evaluator(y_train_ev=data_split_load_average_1_minute[1], y_pred_ev=y_prd)
+arr_rmse_in_xg = current_result_array[0]
+arr_mape_in_xg = current_result_array[1]
+current_result_array_test = evaluator(y_train_ev=data_split_load_average_1_minute_test[1], y_pred_ev=y_prd_test)
+arr_rmse_in_test_xg = current_result_array_test[0]
+arr_mape_in_test_xg = current_result_array_test[1]
+# ####################################################################################
+print "\n\n\nresults "
+print "rmse xg"
+print arr_rmse_in_xg
+print "mape xg"
+print arr_mape_in_xg
+print "test rmse xg"
+print arr_rmse_in_test_xg
+print "test mape xg"
+print arr_mape_in_test_xg
+
+print (time.time()-time2)
+
+
+time2 = time.time()
+# ###################################################################################
+# load_average_5_minutes
+print "\n\n\nload_average_5_minutes "
+
+data_split_load_average_5_minute = np.array([], dtype='float64')
+data_split_load_average_5_minute = data_reader(csv_file=summary_data, total_row=n_rows,
+                                    thousands_splitter=t_splitter, csv_select_columns=csv_select_cols,
+                                    x_column_numbers=x_select_cols, y_column_number=y_select_col_load_average_5_minute)
+
+data_split_load_average_5_minute_test = np.array([], dtype='float64')
+data_split_load_average_5_minute_test = data_reader(csv_file=summary_data_test, total_row=n_rows, thousands_splitter=t_splitter,
+                                         csv_select_columns=csv_select_cols, x_column_numbers=x_select_cols,
+                                         y_column_number=y_select_col_load_average_5_minute)
+
+#  ##################################################################################
+# SVR Grid Search to load_average_5_minutes
+print "\n\n\nSVR Grid Search CV "
+parameters = {'kernel': kernel_type_array , 'C': c_array, 'epsilon': epsilion_array}
+svr = SVR()
+svr_model = GridSearchCV(svr, parameters)
+svr_model.fit(data_split_load_average_5_minute[0], data_split_load_average_5_minute[1])
+y_prd = svr_model.predict(data_split_load_average_5_minute[0])
+print 'train data'
+print array_print(data_split_load_average_5_minute[1])
+print 'train pred'
+print array_print(y_prd)
+y_prd_test = svr_model.predict(data_split_load_average_5_minute_test[0])  # predict y values by train x_train
+print 'test data'
+print array_print(data_split_load_average_5_minute_test[1])
+print 'test pred data'
+print array_print(y_prd_test)
+print svr_model
+y_prd = svr_model.predict(data_split_load_average_5_minute[0])
+y_prd_test = svr_model.predict(data_split_load_average_5_minute_test[0])  # predict y values by train x_train
+current_result_array = evaluator(y_train_ev=data_split_load_average_5_minute[1], y_pred_ev=y_prd)
+arr_rmse_in = current_result_array[0]
+arr_mape_in = current_result_array[1]
+current_result_array_test = evaluator(y_train_ev=data_split_load_average_5_minute_test[1], y_pred_ev=y_prd_test)
+arr_rmse_in_test = current_result_array_test[0]
+arr_mape_in_test = current_result_array_test[1]
+# #############################################################################
+print "\n\n\nresults "
+print "rmse"
+print arr_rmse_in
+print "mape"
+print arr_mape_in
+print "test rmse"
+print arr_rmse_in_test
+print "test mape"
+print arr_mape_in_test
+
+print svr_model.best_params_
+
+print 'time', time.time()-time2
+# #################################################################################
+print "\n\n\nXGBoost "
+xgb_model = XGBRegressor()  # not parameters for tune
+xgb_model.fit(data_split_load_average_5_minute[0], data_split_load_average_5_minute[1])
+y_prd = xgb_model.predict(data_split_load_average_5_minute[0])
+print 'train data'
+print array_print(data_split_load_average_5_minute[1])
+print 'train pred'
+print array_print(y_prd)
+y_prd_test = xgb_model.predict(data_split_load_average_5_minute_test[0])  # predict y values by train x_train
+print 'test data'
+print array_print(data_split_load_average_5_minute_test[1])
+print 'test pred data'
+print array_print(y_prd_test)
+current_result_array = evaluator(y_train_ev=data_split_load_average_5_minute[1], y_pred_ev=y_prd)
+arr_rmse_in_xg = current_result_array[0]
+arr_mape_in_xg = current_result_array[1]
+current_result_array_test = evaluator(y_train_ev=data_split_load_average_5_minute_test[1], y_pred_ev=y_prd_test)
+arr_rmse_in_test_xg = current_result_array_test[0]
+arr_mape_in_test_xg = current_result_array_test[1]
+# ###################################################################################
+print "\n\n\nresults "
+print "rmse xg"
+print arr_rmse_in_xg
+print "mape xg"
+print arr_mape_in_xg
+print "test rmse xg"
+print arr_rmse_in_test_xg
+print "test mape xg"
+print arr_mape_in_test_xg
+
+print (time.time()-time2)
+
+
+time2 = time.time()
+# ###################################################################################
+# load_average_15_minutes
+print "\n\n\nload_average_15_minutes "
+
+data_split_load_average_15_minute = np.array([], dtype='float64')
+data_split_load_average_15_minute = data_reader(csv_file=summary_data, total_row=n_rows,
+                                    thousands_splitter=t_splitter, csv_select_columns=csv_select_cols,
+                                    x_column_numbers=x_select_cols, y_column_number=y_select_col_load_average_5_minute)
+
+data_split_load_average_15_minute_test = np.array([], dtype='float64')
+data_split_load_average_15_minute_test = data_reader(csv_file=summary_data_test, total_row=n_rows, thousands_splitter=t_splitter,
+                                         csv_select_columns=csv_select_cols, x_column_numbers=x_select_cols,
+                                         y_column_number=y_select_col_load_average_5_minute)
+
+#  ##################################################################################
+# SVR Grid Search to load_average_15_minutes
+print "\n\n\nSVR Grid Search CV "
+parameters = {'kernel': kernel_type_array , 'C': c_array, 'epsilon': epsilion_array}
+svr = SVR()
+svr_model = GridSearchCV(svr, parameters)
+svr_model.fit(data_split_load_average_15_minute[0], data_split_load_average_15_minute[1])
+y_prd = svr_model.predict(data_split_load_average_15_minute[0])
+print 'train data'
+print array_print(data_split_load_average_15_minute[1])
+print 'train pred'
+print array_print(y_prd)
+y_prd_test = svr_model.predict(data_split_load_average_15_minute_test[0])  # predict y values by train x_train
+print 'test data'
+print array_print(data_split_load_average_15_minute_test[1])
+print 'test pred data'
+print array_print(y_prd_test)
+print svr_model
+y_prd = svr_model.predict(data_split_load_average_15_minute[0])
+y_prd_test = svr_model.predict(data_split_load_average_15_minute_test[0])  # predict y values by train x_train
+current_result_array = evaluator(y_train_ev=data_split_load_average_15_minute[1], y_pred_ev=y_prd)
+arr_rmse_in = current_result_array[0]
+arr_mape_in = current_result_array[1]
+current_result_array_test = evaluator(y_train_ev=data_split_load_average_15_minute_test[1], y_pred_ev=y_prd_test)
+arr_rmse_in_test = current_result_array_test[0]
+arr_mape_in_test = current_result_array_test[1]
+# #############################################################################
+print "\n\n\nresults "
+print "rmse"
+print arr_rmse_in
+print "mape"
+print arr_mape_in
+print "test rmse"
+print arr_rmse_in_test
+print "test mape"
+print arr_mape_in_test
+
+print svr_model.best_params_
+
+print 'time', time.time()-time2
+# ################################################################################
+print "\n\n\nXGBoost "
+xgb_model = XGBRegressor()  # not parameters for tune
+xgb_model.fit(data_split_load_average_15_minute[0], data_split_load_average_15_minute[1])
+y_prd = xgb_model.predict(data_split_load_average_15_minute[0])
+print 'train data'
+print array_print(data_split_load_average_15_minute[1])
+print 'train pred'
+print array_print(y_prd)
+y_prd_test = xgb_model.predict(data_split_load_average_15_minute_test[0])  # predict y values by train x_train
+print 'test data'
+print array_print(data_split_load_average_15_minute_test[1])
+print 'test pred data'
+print array_print(y_prd_test)
+current_result_array = evaluator(y_train_ev=data_split_load_average_15_minute[1], y_pred_ev=y_prd)
+arr_rmse_in_xg = current_result_array[0]
+arr_mape_in_xg = current_result_array[1]
+current_result_array_test = evaluator(y_train_ev=data_split_load_average_15_minute_test[1], y_pred_ev=y_prd_test)
+arr_rmse_in_test_xg = current_result_array_test[0]
+arr_mape_in_test_xg = current_result_array_test[1]
+# ####################################################################################
+print "\n\n\nresults "
+print "rmse xg"
+print arr_rmse_in_xg
+print "mape xg"
+print arr_mape_in_xg
+print "test rmse xg"
+print arr_rmse_in_test_xg
+print "test mape xg"
+print arr_mape_in_test_xg
+
+print 'time', time.time()-time2
+# ################################################################################
+print 'total time = ', time.time()-time1
