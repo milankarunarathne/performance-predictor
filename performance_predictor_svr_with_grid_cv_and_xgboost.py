@@ -727,12 +727,12 @@ print "\n\n\nload_average_15_minutes "
 data_split_load_average_15_minute = np.array([], dtype='float64')
 data_split_load_average_15_minute = data_reader(csv_file=summary_data, total_row=n_rows,
                                     thousands_splitter=t_splitter, csv_select_columns=csv_select_cols,
-                                    x_column_numbers=x_select_cols, y_column_number=y_select_col_load_average_5_minute)
+                                    x_column_numbers=x_select_cols, y_column_number=y_select_col_load_average_15_minute)
 
 data_split_load_average_15_minute_test = np.array([], dtype='float64')
 data_split_load_average_15_minute_test = data_reader(csv_file=summary_data_test, total_row=n_rows, thousands_splitter=t_splitter,
                                          csv_select_columns=csv_select_cols, x_column_numbers=x_select_cols,
-                                         y_column_number=y_select_col_load_average_5_minute)
+                                         y_column_number=y_select_col_load_average_15_minute)
 
 #  ##################################################################################
 # SVR Grid Search to load_average_15_minutes
