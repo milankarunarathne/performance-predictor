@@ -29,7 +29,7 @@ n_rows = 117   # total rows
 row_start = 25  # testing rows at start
 r_seed = 42  # seed of random (random seed)
 kernel_type_array = ['rbf', 'poly', 'linear']
-c_array = [1E-3, 1E-2, 1E-1,1E0, 1E1, 1E2, 1E3, 1E4, 1E5, 1E6, 1E7, 1E8 ]
+c_array = [1E-3, 1E-2, 1E-1,1E0, 1E1, 1E2, 1E3, 1E4, 1E5, 1E6, 1E7, 1E8 ] # milan
 epsilion_array = [0.001, 0.5, 0.999, 1.498, 1.997, 2.496, 2.995, 3.494, 3.993, 4.492, 4.991, 5.49, 5.989, 6.488, 6.987, 7.486, 7.985, 8.484, 8.983, 9.482, 9.981]
 gamma_default = 'auto'
 
@@ -727,12 +727,12 @@ print "\n\n\nload_average_15_minutes "
 data_split_load_average_15_minute = np.array([], dtype='float64')
 data_split_load_average_15_minute = data_reader(csv_file=summary_data, total_row=n_rows,
                                     thousands_splitter=t_splitter, csv_select_columns=csv_select_cols,
-                                    x_column_numbers=x_select_cols, y_column_number=y_select_col_load_average_5_minute)
+                                    x_column_numbers=x_select_cols, y_column_number=y_select_col_load_average_15_minute)
 
 data_split_load_average_15_minute_test = np.array([], dtype='float64')
 data_split_load_average_15_minute_test = data_reader(csv_file=summary_data_test, total_row=n_rows, thousands_splitter=t_splitter,
                                          csv_select_columns=csv_select_cols, x_column_numbers=x_select_cols,
-                                         y_column_number=y_select_col_load_average_5_minute)
+                                         y_column_number=y_select_col_load_average_15_minute)
 
 #  ##################################################################################
 # SVR Grid Search to load_average_15_minutes
