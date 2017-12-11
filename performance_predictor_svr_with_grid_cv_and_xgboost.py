@@ -933,6 +933,7 @@ data_split_load_average_15_minute_test = np.array([], dtype='float64')
 data_split_load_average_15_minute_test = data_reader(csv_file=summary_data_test, total_row=n_rows, thousands_splitter=t_splitter,
                                          csv_select_columns=csv_select_cols, x_column_numbers=x_select_cols,
                                          y_column_number=y_select_col_load_average_15_minute)
+<<<<<<< HEAD
 #
 # #  ##################################################################################
 # # SVR Grid Search to load_average_15_minutes
@@ -976,6 +977,8 @@ data_split_load_average_15_minute_test = data_reader(csv_file=summary_data_test,
 # print 'time', time.time()-time2
 # ################################################################################
 print "\n\n\nXGBoost 15 minutes load average"
+=======
+>>>>>>> 6bb2a43c62e01957ee9f341883b705108f1d6c53
 
 parameters_load_average_15_minute = {'max_depth' : [3], 'learning_rate': [0.1], 'n_estimators': [100], 'min_child_weight': [1], 'max_delta_step': [0], 'objective': ['reg:linear']}
 xgboost_load_average_15_minute = XGBRegressor(max_depth=3, learning_rate=0.1, n_estimators=50, silent=True, objective= 'reg:linear')
