@@ -25,7 +25,8 @@ csv_select_cols = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17,
 # 9 = M / S, 10 = C / M, 11 = C / S, 12 = S / M, 13 = S / C, 14 = M / S * C, 15 = S / M * C,
 # 16 =	C / M * S, 17 = 1 / M * C * S, 18 = N * C
 # x_select_cols = [0, 1, 2, 3, 10]  # select columns to x (features)
-x_select_cols_throughput = [0, 1, 2, 3, 13]
+x_select_cols_throughput_svr = [0, 1, 2, 3, 5, 10]
+x_select_cols_throughput_xgboost = [0, 1, 2, 3, 11]
 y_select_col_latency = 20
 y_select_col_90th_percentile = 21
 y_select_col_95th_percentile = 22
@@ -106,35 +107,76 @@ time2 = time.time()
 # throughput
 print "\n\n\nThroughput "
 
-data_split_throughput = np.array([], dtype='float64')
-data_split_throughput = data_reader(csv_file=summary_data, total_row=n_rows,
+data_split_throughput_svr = np.array([], dtype='float64')
+data_split_throughput_svr = data_reader(csv_file=summary_data, total_row=n_rows,
                                     thousands_splitter=t_splitter, csv_select_columns=csv_select_cols,
-                                    x_column_numbers=x_select_cols_throughput, y_column_number=y_select_col_throughput)
+                                    x_column_numbers=x_select_cols_throughput_svr, y_column_number=y_select_col_throughput)
 
-data_split_throughput_test = np.array([], dtype='float64')
-data_split_throughput_test = data_reader(csv_file=summary_data_test, total_row=n_rows, thousands_splitter=t_splitter,
-                                         csv_select_columns=csv_select_cols, x_column_numbers=x_select_cols_throughput,
+data_split_throughput_svr_test = np.array([], dtype='float64')
+data_split_throughput_svr_test = data_reader(csv_file=summary_data_test, total_row=n_rows, thousands_splitter=t_splitter,
+                                         csv_select_columns=csv_select_cols, x_column_numbers=x_select_cols_throughput_svr,
                                          y_column_number=y_select_col_throughput)
 # additional feature 10 = Concurrency / Message size
 
 
 #  ##################################################################################
-print "\n\n\nSVR Grid Search CV "
-parameters = {'kernel': ['rbf', 'poly', 'linear'], 'C': [1E2, 1E3], 'epsilon': [0.0001, 0.0005, 0.001, 0.005,  0.01, 0.05, 0.1, 0.5, 10]}
-svr = SVR(coef0=0.1, tol=0.001, shrinking=True, cache_size=200, verbose=False, max_iter=-1)
-svr_model = GridSearchCV(svr, parameters, cv=10, n_jobs=6, return_train_score=False, refit=True, scoring='neg_mean_squared_error')
-svr_model.fit(data_split_throughput[0], data_split_throughput[1])
-y_prd = svr_model.predict(data_split_throughput[0])
-y_prd_test = svr_model.predict(data_split_throughput_test[0])  # predict y values by train x_train
-print 'test data'
-print array_print(data_split_throughput_test[1])
-print 'test pred data'
-print array_print(y_prd_test)
-print svr_model.best_params_
-y_prd_throughput_svr = svr_model.predict(data_split_throughput[0])
-y_prd_throughput_svr_test = svr_model.predict(data_split_throughput_test[0])  # predict y values by train x_train
-current_result_array = evaluator(y_real_ev=data_split_throughput[1], y_pred_ev=y_prd_throughput_svr)
-print array_print(current_result_array)
-array_print(evaluator(y_real_ev=data_split_throughput_test[1], y_pred_ev=y_prd_throughput_svr_test))
-print 'time', time.time()-time2
+# print "\n\n\nSVR Grid Search CV "
+# parameters = {'kernel': ['rbf', 'poly', 'linear'], 'C': [1E2, 1E3], 'epsilon': [0.0001, 0.0005, 0.001, 0.005,  0.01, 0.05, 0.1, 0.5, 10]}
+# svr = SVR(coef0=0.1, tol=0.001, shrinking=True, cache_size=200, verbose=False, max_iter=-1)
+# svr_model = GridSearchCV(svr, parameters, cv=10, n_jobs=6, return_train_score=False, refit=True, scoring='neg_mean_squared_error')
+# svr_model.fit(data_split_throughput[0], data_split_throughput[1])
+# y_prd = svr_model.predict(data_split_throughput[0])
+# y_prd_test = svr_model.predict(data_split_throughput_test[0])  # predict y values by train x_train
+# print 'test data'
+# print array_print(data_split_throughput_test[1])
+# print 'test pred data'
+# print array_print(y_prd_test)
+# print svr_model.best_params_
+# y_prd_throughput_svr = svr_model.predict(data_split_throughput[0])
+# y_prd_throughput_svr_test = svr_model.predict(data_split_throughput_test[0])  # predict y values by train x_train
+# current_result_array = evaluator(y_real_ev=data_split_throughput[1], y_pred_ev=y_prd_throughput_svr)
+# print array_print(current_result_array)
+# array_print(evaluator(y_real_ev=data_split_throughput_test[1], y_pred_ev=y_prd_throughput_svr_test))
+# print 'time', time.time()-time2
 # #############################################################################
+
+print "\n\n\nXGBoost "
+
+data_split_throughput_xgboost = np.array([], dtype='float64')
+data_split_throughput_xgboost = data_reader(csv_file=summary_data, total_row=n_rows, thousands_splitter=t_splitter,
+                                            csv_select_columns=csv_select_cols,
+                                            x_column_numbers=x_select_cols_throughput_xgboost,
+                                            y_column_number=y_select_col_throughput)
+
+data_split_throughput_xgboost_test = np.array([], dtype='float64')
+data_split_throughput_xgboost_test = data_reader(csv_file=summary_data_test, total_row=n_rows,
+                                                 thousands_splitter=t_splitter, csv_select_columns=csv_select_cols,
+                                                 x_column_numbers=x_select_cols_throughput_xgboost,
+                                                 y_column_number=y_select_col_throughput)
+# additional feature 10 = Concurrency / Message size
+parameters_latency = {'max_depth': [2, 3, 4], 'learning_rate': [0.05, 0.09, 0.1, 0.5], 'n_estimators': [10, 40, 50, 100], 'min_child_weight': [1], 'max_delta_step': [0], 'objective': ['reg:linear']}
+xgboost_throughput = xgb.XGBRegressor(learning_rate=0.1, n_estimators=200, silent=True,
+                                      objective='reg:linear', gamma=0, min_child_weight=1, max_delta_step=0,
+                                      subsample=0.8, colsample_bytree=1, colsample_bylevel=1, reg_alpha=0,
+                                      reg_lambda=1, scale_pos_weight=3, base_score=0.5, missing=None)
+
+
+bst_model = RandomizedSearchCV(xgboost_throughput, parameters_latency, n_jobs=5,  cv=5, refit=True, return_train_score=True)
+
+xgboost_best_throughput = bst_model.fit(X=data_split_throughput_xgboost[0],
+                                                 y=data_split_throughput_xgboost[1],
+                                                 eval_set=[(data_split_throughput_xgboost[0],
+                                                            data_split_throughput_xgboost[1]),
+                                                           (data_split_throughput_xgboost_test[0],
+                                                            data_split_throughput_xgboost_test[1])],
+                                                 eval_metric='rmse', early_stopping_rounds=20)
+
+
+print array_print(data_split_throughput_xgboost_test[1])
+print array_print( xgboost_best_throughput.predict(data_split_throughput_xgboost_test[0]))
+print array_print(evaluator(data_split_throughput_xgboost[1],
+                            xgboost_best_throughput.predict(data_split_throughput_xgboost[0])))
+print array_print(evaluator(data_split_throughput_xgboost_test[1],
+                            xgboost_best_throughput.predict(data_split_throughput_xgboost_test[0])))
+
+print (time.time()-time2)
