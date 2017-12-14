@@ -147,8 +147,8 @@ svr_best_model_throughput = GridSearchCV(svr_throughput, parameters_svr_throughp
 
 svr_best_throughput = svr_best_model_throughput.fit(data_split_throughput_svr[0], data_split_throughput_svr[1])
 
-print array_print(data_split_throughput_svr_test[1])
-print array_print(svr_best_model_throughput.predict(data_split_throughput_svr_test[0]))
+# print array_print(data_split_throughput_svr_test[1])
+# print array_print(svr_best_model_throughput.predict(data_split_throughput_svr_test[0]))
 print array_print(evaluator(data_split_throughput_svr[1],
                             svr_best_throughput.predict(data_split_throughput_svr[0])))
 print array_print(evaluator(data_split_throughput_svr_test[1],
@@ -193,8 +193,8 @@ xgboost_best_throughput = xgboost_best_model_throughput.fit(X=data_split_through
                                                             eval_metric='rmse', early_stopping_rounds=10)
 
 
-print array_print(data_split_throughput_xgboost_test[1])
-print array_print( xgboost_best_throughput.predict(data_split_throughput_xgboost_test[0]))
+# print array_print(data_split_throughput_xgboost_test[1])
+# print array_print( xgboost_best_throughput.predict(data_split_throughput_xgboost_test[0]))
 print array_print(evaluator(data_split_throughput_xgboost[1],
                             xgboost_best_throughput.predict(data_split_throughput_xgboost[0])))
 print array_print(evaluator(data_split_throughput_xgboost_test[1],
@@ -234,8 +234,8 @@ svr_best_model_latency = GridSearchCV(svr_latency, parameters_svr_latency, cv=10
 
 svr_best_latency = svr_best_model_latency.fit(data_split_latency_svr[0], data_split_latency_svr[1])
 
-print array_print(data_split_latency_svr_test[1])
-print array_print(svr_best_model_latency.predict(data_split_latency_svr_test[0]))
+# print array_print(data_split_latency_svr_test[1])
+# print array_print(svr_best_model_latency.predict(data_split_latency_svr_test[0]))
 print array_print(evaluator(data_split_latency_svr[1],
                             svr_best_latency.predict(data_split_latency_svr[0])))
 print array_print(evaluator(data_split_latency_svr_test[1],
@@ -252,7 +252,7 @@ data_split_latency_xgboost = data_reader(csv_file=summary_data, total_row=n_rows
                                             csv_select_columns=csv_select_cols,
                                             x_column_numbers=x_select_cols_latency_xgboost,
                                             y_column_number=y_select_col_latency)
-print "sdf1"
+
 data_split_latency_xgboost_test = np.array([], dtype='float64')
 data_split_latency_xgboost_test = data_reader(csv_file=summary_data_test, total_row=n_rows,
                                                  thousands_splitter=t_splitter, csv_select_columns=csv_select_cols,
@@ -260,20 +260,17 @@ data_split_latency_xgboost_test = data_reader(csv_file=summary_data_test, total_
                                                  y_column_number=y_select_col_latency)
 # additional feature 10 = Concurrency / Message size
 
-print "sdf2"
 parameters_xgboost_latency = {'max_depth': [3], 'learning_rate': [0.1], 'n_estimators': [10],
                               'min_child_weight': [1], 'max_delta_step': [0], 'objective': ['reg:linear']}
 
-print "sdf3"
 xgboost_latency = xgb.XGBRegressor(silent=True, objective='reg:linear', gamma=0,
                                    subsample=1, colsample_bytree=1, colsample_bylevel=1,
                                    reg_alpha=0, reg_lambda=1, scale_pos_weight=1,
                                    base_score=0.5, missing=None)
 
-print "sdf4"
 xgboost_best_model_latency = GridSearchCV(xgboost_latency, parameters_xgboost_latency, n_jobs=1,
                                           cv=10, refit=True, return_train_score=True)
-print "sdsfs5"
+
 xgboost_best_latency = xgboost_best_model_latency.fit(X=data_split_latency_xgboost[0],
                                                       y=data_split_latency_xgboost[1],
                                                       eval_set=[(data_split_latency_xgboost[0],
@@ -283,8 +280,8 @@ xgboost_best_latency = xgboost_best_model_latency.fit(X=data_split_latency_xgboo
                                                       eval_metric='rmse', early_stopping_rounds=10)
 
 print "sdfsfd6"
-print array_print(data_split_latency_xgboost_test[1])
-print array_print( xgboost_best_latency.predict(data_split_latency_xgboost_test[0]))
+# print array_print(data_split_latency_xgboost_test[1])
+# print array_print( xgboost_best_latency.predict(data_split_latency_xgboost_test[0]))
 print array_print(evaluator(data_split_latency_xgboost[1],
                             xgboost_best_latency.predict(data_split_latency_xgboost[0])))
 print array_print(evaluator(data_split_latency_xgboost_test[1],
