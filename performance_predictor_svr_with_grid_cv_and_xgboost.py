@@ -25,8 +25,8 @@ csv_select_cols = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17,
 # 9 = M / S, 10 = C / M, 11 = C / S, 12 = S / M, 13 = S / C, 14 = M / S * C, 15 = S / M * C,
 # 16 =	C / M * S, 17 = 1 / M * C * S, 18 = N * C
 # x_select_cols = [0, 1, 2, 3, 10]  # select columns to x (features)
-x_select_cols_throughput_svr = [0, 1, 2, 3, 4]
-x_select_cols_throughput_xgboost = [0, 1, 2, 3, 14]
+x_select_cols_throughput_svr = [0, 1, 2, 3, 4]  # additional feature is 4 = Message size * Concurrency users
+x_select_cols_throughput_xgboost = [0, 1, 2, 3]  #
 x_select_cols_latency_svr = [0, 1, 2, 3]
 x_select_cols_latency_xgboost = [0, 1, 2, 3]
 x_select_cols_90th_percentile_svr = [0, 1, 2, 3]
@@ -138,7 +138,7 @@ data_split_throughput_svr_test = data_reader(csv_file=summary_data_test, total_r
 #  ##################################################################################
 print "\n\n\nSVR Grid Search CV Throughput"
 parameters_svr_throughput = {'kernel': ['rbf', 'poly', 'linear'], 'C': [1E2, 1E3],
-                             'epsilon': [0.0001, 0.0005, 0.001, 0.005,  0.01, 0.05, 0.1, 0.5, 10]}
+                             'epsilon': [0.0001, 0.0005, 0.001, 0.005,  0.01, 0.05, 0.1, 0.5, 1, 5, 10]}
 
 svr_throughput = SVR(coef0=0.1, tol=0.001, shrinking=True, cache_size=200, verbose=False, max_iter=-1)
 
