@@ -26,7 +26,7 @@ csv_select_cols = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17,
 # 16 =	C / M * S, 17 = 1 / M * C * S, 18 = N * C
 # x_select_cols = [0, 1, 2, 3, 10]  # select columns to x (features)
 x_select_cols_throughput_svr = [0, 1, 2, 3, 4]  # additional feature is 4 = Message size * Concurrency users
-x_select_cols_throughput_xgboost = [0, 1, 2, 3]  #
+x_select_cols_throughput_xgboost = [0, 1, 2, 3, 7]  # additional feature is 7 = Message size * Sleep time
 x_select_cols_latency_svr = [0, 1, 2, 3]
 x_select_cols_latency_xgboost = [0, 1, 2, 3]
 x_select_cols_90th_percentile_svr = [0, 1, 2, 3]
@@ -173,8 +173,8 @@ data_split_throughput_xgboost_test = data_reader(csv_file=summary_data_test, tot
                                                  y_column_number=y_select_col_throughput)
 # additional feature 10 = Concurrency / Message size
 
-parameters_xgboost_throughput = {'max_depth': [3], 'learning_rate': [0.1], 'n_estimators': [10],
-                                 'min_child_weight': [1], 'max_delta_step': [0], 'objective': ['reg:linear']}
+parameters_xgboost_throughput = {'max_depth': [3], 'learning_rate': [0.035], 'n_estimators': [200],
+                                 'min_child_weight': [2], 'max_delta_step': [0]}
 
 xgboost_throughput = xgb.XGBRegressor(silent=True, objective='reg:linear', gamma=0,
                                       subsample=1, colsample_bytree=1, colsample_bylevel=1, reg_alpha=0,
@@ -193,99 +193,12 @@ xgboost_best_throughput = xgboost_best_model_throughput.fit(X=data_split_through
                                                             eval_metric='rmse', early_stopping_rounds=10)
 
 
-# print array_print(data_split_throughput_xgboost_test[1])
-# print array_print( xgboost_best_throughput.predict(data_split_throughput_xgboost_test[0]))
+print array_print(data_split_throughput_xgboost_test[1])
+print array_print( xgboost_best_throughput.predict(data_split_throughput_xgboost_test[0]))
 print array_print(evaluator(data_split_throughput_xgboost[1],
                             xgboost_best_throughput.predict(data_split_throughput_xgboost[0])))
 print array_print(evaluator(data_split_throughput_xgboost_test[1],
                             xgboost_best_throughput.predict(data_split_throughput_xgboost_test[0])))
-
-print (time.time()-time2)
-# ###########################################################################
-
-# ###################################################################################
-# latency
-print "\n\n\nlatency "
-
-data_split_latency_svr = np.array([], dtype='float64')
-data_split_latency_svr = data_reader(csv_file=summary_data, total_row=n_rows, thousands_splitter=t_splitter,
-                                     csv_select_columns=csv_select_cols,
-                                     x_column_numbers=x_select_cols_latency_svr,
-                                     y_column_number=y_select_col_latency)
-
-data_split_latency_svr_test = np.array([], dtype='float64')
-data_split_latency_svr_test = data_reader(csv_file=summary_data_test, total_row=n_rows,
-                                          thousands_splitter=t_splitter,
-                                          csv_select_columns=csv_select_cols,
-                                          x_column_numbers=x_select_cols_latency_svr,
-                                          y_column_number=y_select_col_latency)
-
-# additional feature 10 = Concurrency / Message size
-
-#  ##################################################################################
-print "\n\n\nSVR Grid Search CV latency"
-parameters_svr_latency = {'kernel': ['rbf', 'poly', 'linear'], 'C': [1E2, 1E3],
-                          'epsilon': [0.0001, 0.0005, 0.001, 0.005,  0.01, 0.05, 0.1, 0.5, 10]}
-
-svr_latency = SVR(coef0=0.1, tol=0.001, shrinking=True, cache_size=200, verbose=False, max_iter=-1)
-
-svr_best_model_latency = GridSearchCV(svr_latency, parameters_svr_latency, cv=10, n_jobs=4,
-                                      return_train_score=True, refit=True, scoring='neg_mean_squared_error')
-
-svr_best_latency = svr_best_model_latency.fit(data_split_latency_svr[0], data_split_latency_svr[1])
-
-# print array_print(data_split_latency_svr_test[1])
-# print array_print(svr_best_model_latency.predict(data_split_latency_svr_test[0]))
-print array_print(evaluator(data_split_latency_svr[1],
-                            svr_best_latency.predict(data_split_latency_svr[0])))
-print array_print(evaluator(data_split_latency_svr_test[1],
-                            svr_best_latency.predict(data_split_latency_svr_test[0])))
-
-print 'time', time.time()-time2
-# #############################################################################
-
-
-print "\n\n\nXGBoost Grid Search CV latency "
-
-data_split_latency_xgboost = np.array([], dtype='float64')
-data_split_latency_xgboost = data_reader(csv_file=summary_data, total_row=n_rows, thousands_splitter=t_splitter,
-                                            csv_select_columns=csv_select_cols,
-                                            x_column_numbers=x_select_cols_latency_xgboost,
-                                            y_column_number=y_select_col_latency)
-
-data_split_latency_xgboost_test = np.array([], dtype='float64')
-data_split_latency_xgboost_test = data_reader(csv_file=summary_data_test, total_row=n_rows,
-                                                 thousands_splitter=t_splitter, csv_select_columns=csv_select_cols,
-                                                 x_column_numbers=x_select_cols_latency_xgboost,
-                                                 y_column_number=y_select_col_latency)
-# additional feature 10 = Concurrency / Message size
-
-parameters_xgboost_latency = {'max_depth': [3], 'learning_rate': [0.1], 'n_estimators': [10],
-                              'min_child_weight': [1], 'max_delta_step': [0], 'objective': ['reg:linear']}
-
-xgboost_latency = xgb.XGBRegressor(silent=True, objective='reg:linear', gamma=0,
-                                   subsample=1, colsample_bytree=1, colsample_bylevel=1,
-                                   reg_alpha=0, reg_lambda=1, scale_pos_weight=1,
-                                   base_score=0.5, missing=None)
-
-xgboost_best_model_latency = GridSearchCV(xgboost_latency, parameters_xgboost_latency, n_jobs=1,
-                                          cv=10, refit=True, return_train_score=True)
-
-xgboost_best_latency = xgboost_best_model_latency.fit(X=data_split_latency_xgboost[0],
-                                                      y=data_split_latency_xgboost[1],
-                                                      eval_set=[(data_split_latency_xgboost[0],
-                                                                 data_split_latency_xgboost[1]),
-                                                                (data_split_latency_xgboost_test[0],
-                                                                 data_split_latency_xgboost_test[1])],
-                                                      eval_metric='rmse', early_stopping_rounds=10)
-
-print "sdfsfd6"
-# print array_print(data_split_latency_xgboost_test[1])
-# print array_print( xgboost_best_latency.predict(data_split_latency_xgboost_test[0]))
-print array_print(evaluator(data_split_latency_xgboost[1],
-                            xgboost_best_latency.predict(data_split_latency_xgboost[0])))
-print array_print(evaluator(data_split_latency_xgboost_test[1],
-                            xgboost_best_latency.predict(data_split_latency_xgboost_test[0])))
 
 print (time.time()-time2)
 # ###########################################################################
