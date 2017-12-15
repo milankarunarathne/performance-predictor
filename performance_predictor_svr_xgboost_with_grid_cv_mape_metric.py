@@ -21,9 +21,9 @@ summary_data_test = 'resources/test/old/wso2apimanagerperformanceresults.csv'
 t_splitter = ","
 
 csv_select_cols = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 23, 26, 27, 28, 29, 52, 53, 54]
-# 4 = M * C, 5 =  M * S, 6 = S * C, 7 = M * S * C, 8 =	M / C,
+# 4 = M * C, 5 =  M * S, 6 = S * C, 7 = M * S * C, 8 =  M / C,
 # 9 = M / S, 10 = C / M, 11 = C / S, 12 = S / M, 13 = S / C, 14 = M / S * C, 15 = S / M * C,
-# 16 =	C / M * S, 17 = 1 / M * C * S, 18 = N * C
+# 16 =  C / M * S, 17 = 1 / M * C * S, 18 = N * C
 # x_select_cols = [0, 1, 2, 3, 10]  # select columns to x (features)
 x_select_cols_throughput_svr = [0, 1, 2, 3, 4]  # additional feature is 4 = Message size * Concurrency users
 x_select_cols_throughput_xgboost = [0, 1, 2, 3, 7]  # additional feature is 7 = Message size * Sleep time
@@ -32,11 +32,11 @@ x_select_cols_latency_xgboost = [0, 1, 2, 3, 4]
 x_select_cols_90th_percentile_svr = [0, 1, 2, 3, 4]
 x_select_cols_90th_percentile_xgboost = [0, 1, 2, 3, 4]
 x_select_cols_95th_percentile_svr = [0, 1, 2, 3, 4]
-x_select_cols_95th_percentile_xgboost = [0, 1, 2, 3, 4]
+x_select_cols_95th_percentile_xgboost = [0, 1, 2, 3]
 x_select_cols_99th_percentile_svr = [0, 1, 2, 3, 4]
 x_select_cols_99th_percentile_xgboost = [0, 1, 2, 3, 4]
 x_select_cols_load_average_1_minute_svr = [0, 1, 2, 3, 10]
-x_select_cols_load_average_1_minute_xgboost = [0, 1, 2, 3, 11]
+x_select_cols_load_average_1_minute_xgboost = [0, 1, 2, 3, 8]
 x_select_cols_load_average_5_minute_svr = [0, 1, 2, 3]
 x_select_cols_load_average_5_minute_xgboost = [0, 1, 2, 3, 13]
 x_select_cols_load_average_15_minute_svr = [0, 1, 2, 3]
@@ -142,7 +142,7 @@ parameters_svr_throughput = {'kernel': ['rbf', 'poly', 'linear'], 'C': [1E2, 1E3
 
 svr_throughput = SVR(coef0=0.1, tol=0.001, shrinking=True, cache_size=200, verbose=False, max_iter=-1)
 
-svr_best_model_throughput = GridSearchCV(svr_throughput, parameters_svr_throughput, cv=10, n_jobs=4,
+svr_best_model_throughput = GridSearchCV(svr_throughput, parameters_svr_throughput, cv=10, n_jobs=1,
                                          return_train_score=True, refit=True, scoring='neg_mean_absolute_error')
 
 svr_best_throughput = svr_best_model_throughput.fit(data_split_throughput_svr[0], data_split_throughput_svr[1])
@@ -173,15 +173,15 @@ data_split_throughput_xgboost_test = data_reader(csv_file=summary_data_test, tot
                                                  y_column_number=y_select_col_throughput)
 # additional feature 10 = Concurrency / Message size
 
-parameters_xgboost_throughput = {'max_depth': [3], 'learning_rate': [0.1], 'n_estimators': [100],
-                                 'min_child_weight': [1], 'max_delta_step': [0]}
+parameters_xgboost_throughput = {'max_depth': [3], 'learning_rate': [0.03], 'n_estimators': [80],
+                                 'min_child_weight': [2], 'max_delta_step': [0]}
 
 xgboost_throughput = xgb.XGBRegressor(silent=True, objective='reg:linear', gamma=0,
                                       subsample=1, colsample_bytree=1, colsample_bylevel=1, reg_alpha=0,
                                       reg_lambda=1, scale_pos_weight=1, base_score=0.5, missing=None)
 
 
-xgboost_best_model_throughput = GridSearchCV(xgboost_throughput, parameters_xgboost_throughput, n_jobs=4,
+xgboost_best_model_throughput = GridSearchCV(xgboost_throughput, parameters_xgboost_throughput, n_jobs=1,
                                              cv=10, refit=True, return_train_score=True)
 
 xgboost_best_throughput = xgboost_best_model_throughput.fit(X=data_split_throughput_xgboost[0],
@@ -232,7 +232,7 @@ parameters_svr_latency = {'kernel': ['rbf', 'poly', 'linear'], 'C': [1E2, 1E3],
 
 svr_latency = SVR(coef0=0.1, tol=0.001, shrinking=True, cache_size=200, verbose=False, max_iter=-1)
 
-svr_best_model_latency = GridSearchCV(svr_latency, parameters_svr_latency, cv=10, n_jobs=4,
+svr_best_model_latency = GridSearchCV(svr_latency, parameters_svr_latency, cv=10, n_jobs=1,
                                          return_train_score=True, refit=True, scoring='neg_mean_absolute_error')
 
 svr_best_latency = svr_best_model_latency.fit(data_split_latency_svr[0], data_split_latency_svr[1])
@@ -263,15 +263,15 @@ data_split_latency_xgboost_test = data_reader(csv_file=summary_data_test, total_
                                                  y_column_number=y_select_col_latency)
 # additional feature 10 = Concurrency / Message size
 
-parameters_xgboost_latency = {'max_depth': [3], 'learning_rate': [0.035], 'n_estimators': [200],
-                                 'min_child_weight': [2], 'max_delta_step': [0]}
+parameters_xgboost_latency = {'max_depth': [5], 'learning_rate': [0.005], 'n_estimators': [1000],
+                                 'min_child_weight': [1], 'max_delta_step': [0]}
 
 xgboost_latency = xgb.XGBRegressor(silent=True, objective='reg:linear', gamma=0,
                                       subsample=1, colsample_bytree=1, colsample_bylevel=1, reg_alpha=0,
                                       reg_lambda=1, scale_pos_weight=1, base_score=0.5, missing=None)
 
 
-xgboost_best_model_latency = GridSearchCV(xgboost_latency, parameters_xgboost_latency, n_jobs=4,
+xgboost_best_model_latency = GridSearchCV(xgboost_latency, parameters_xgboost_latency, n_jobs=1,
                                              cv=10, refit=True, return_train_score=True)
 
 xgboost_best_latency = xgboost_best_model_latency.fit(X=data_split_latency_xgboost[0],
@@ -291,7 +291,7 @@ print array_print(evaluator(data_split_latency_xgboost_test[1],
                             xgboost_best_latency.predict(data_split_latency_xgboost_test[0])))
 
 print (time.time()-time2)
-# ###########################################################################
+###########################################################################
 
 
 
@@ -322,7 +322,7 @@ parameters_svr_90th_percentile = {'kernel': ['rbf', 'poly', 'linear'], 'C': [1E2
 
 svr_90th_percentile = SVR(coef0=0.1, tol=0.001, shrinking=True, cache_size=200, verbose=False, max_iter=-1)
 
-svr_best_model_90th_percentile = GridSearchCV(svr_90th_percentile, parameters_svr_90th_percentile, cv=10, n_jobs=4,
+svr_best_model_90th_percentile = GridSearchCV(svr_90th_percentile, parameters_svr_90th_percentile, cv=10, n_jobs=1,
                                          return_train_score=True, refit=True, scoring='neg_mean_absolute_error')
 
 svr_best_90th_percentile = svr_best_model_90th_percentile.fit(data_split_90th_percentile_svr[0], data_split_90th_percentile_svr[1])
@@ -353,15 +353,15 @@ data_split_90th_percentile_xgboost_test = data_reader(csv_file=summary_data_test
                                                  y_column_number=y_select_col_90th_percentile)
 # additional feature 10 = Concurrency / Message size
 
-parameters_xgboost_90th_percentile = {'max_depth': [3], 'learning_rate': [0.035], 'n_estimators': [200],
-                                 'min_child_weight': [2], 'max_delta_step': [0]}
+parameters_xgboost_90th_percentile = {'max_depth': [5], 'learning_rate': [0.009], 'n_estimators': [1000],
+                                 'min_child_weight': [1], 'max_delta_step': [0]}
 
 xgboost_90th_percentile = xgb.XGBRegressor(silent=True, objective='reg:linear', gamma=0,
                                       subsample=1, colsample_bytree=1, colsample_bylevel=1, reg_alpha=0,
                                       reg_lambda=1, scale_pos_weight=1, base_score=0.5, missing=None)
 
 
-xgboost_best_model_90th_percentile = GridSearchCV(xgboost_90th_percentile, parameters_xgboost_90th_percentile, n_jobs=4,
+xgboost_best_model_90th_percentile = GridSearchCV(xgboost_90th_percentile, parameters_xgboost_90th_percentile, n_jobs=1,
                                              cv=10, refit=True, return_train_score=True)
 
 xgboost_best_90th_percentile = xgboost_best_model_90th_percentile.fit(X=data_split_90th_percentile_xgboost[0],
@@ -412,7 +412,7 @@ parameters_svr_95th_percentile = {'kernel': ['rbf', 'poly', 'linear'], 'C': [1E2
 
 svr_95th_percentile = SVR(coef0=0.1, tol=0.001, shrinking=True, cache_size=200, verbose=False, max_iter=-1)
 
-svr_best_model_95th_percentile = GridSearchCV(svr_95th_percentile, parameters_svr_95th_percentile, cv=10, n_jobs=4,
+svr_best_model_95th_percentile = GridSearchCV(svr_95th_percentile, parameters_svr_95th_percentile, cv=10, n_jobs=1,
                                          return_train_score=True, refit=True, scoring='neg_mean_absolute_error')
 
 svr_best_95th_percentile = svr_best_model_95th_percentile.fit(data_split_95th_percentile_svr[0], data_split_95th_percentile_svr[1])
@@ -443,7 +443,7 @@ data_split_95th_percentile_xgboost_test = data_reader(csv_file=summary_data_test
                                                  y_column_number=y_select_col_95th_percentile)
 # additional feature 10 = Concurrency / Message size
 
-parameters_xgboost_95th_percentile = {'max_depth': [3], 'learning_rate': [0.035], 'n_estimators': [200],
+parameters_xgboost_95th_percentile = {'max_depth': [3], 'learning_rate': [0.025], 'n_estimators': [800],
                                  'min_child_weight': [2], 'max_delta_step': [0]}
 
 xgboost_95th_percentile = xgb.XGBRegressor(silent=True, objective='reg:linear', gamma=0,
@@ -451,7 +451,7 @@ xgboost_95th_percentile = xgb.XGBRegressor(silent=True, objective='reg:linear', 
                                       reg_lambda=1, scale_pos_weight=1, base_score=0.5, missing=None)
 
 
-xgboost_best_model_95th_percentile = GridSearchCV(xgboost_95th_percentile, parameters_xgboost_95th_percentile, n_jobs=4,
+xgboost_best_model_95th_percentile = GridSearchCV(xgboost_95th_percentile, parameters_xgboost_95th_percentile, n_jobs=1,
                                              cv=10, refit=True, return_train_score=True)
 
 xgboost_best_95th_percentile = xgboost_best_model_95th_percentile.fit(X=data_split_95th_percentile_xgboost[0],
@@ -502,7 +502,7 @@ parameters_svr_99th_percentile = {'kernel': ['rbf', 'poly', 'linear'], 'C': [1E2
 
 svr_99th_percentile = SVR(coef0=0.1, tol=0.001, shrinking=True, cache_size=200, verbose=False, max_iter=-1)
 
-svr_best_model_99th_percentile = GridSearchCV(svr_99th_percentile, parameters_svr_99th_percentile, cv=10, n_jobs=4,
+svr_best_model_99th_percentile = GridSearchCV(svr_99th_percentile, parameters_svr_99th_percentile, cv=10, n_jobs=1,
                                          return_train_score=True, refit=True, scoring='neg_mean_absolute_error')
 
 svr_best_99th_percentile = svr_best_model_99th_percentile.fit(data_split_99th_percentile_svr[0], data_split_99th_percentile_svr[1])
@@ -533,7 +533,7 @@ data_split_99th_percentile_xgboost_test = data_reader(csv_file=summary_data_test
                                                  y_column_number=y_select_col_99th_percentile)
 # additional feature 10 = Concurrency / Message size
 
-parameters_xgboost_99th_percentile = {'max_depth': [3], 'learning_rate': [0.035], 'n_estimators': [200],
+parameters_xgboost_99th_percentile = {'max_depth': [4], 'learning_rate': [0.03], 'n_estimators': [1000],
                                  'min_child_weight': [2], 'max_delta_step': [0]}
 
 xgboost_99th_percentile = xgb.XGBRegressor(silent=True, objective='reg:linear', gamma=0,
@@ -541,7 +541,7 @@ xgboost_99th_percentile = xgb.XGBRegressor(silent=True, objective='reg:linear', 
                                       reg_lambda=1, scale_pos_weight=1, base_score=0.5, missing=None)
 
 
-xgboost_best_model_99th_percentile = GridSearchCV(xgboost_99th_percentile, parameters_xgboost_99th_percentile, n_jobs=4,
+xgboost_best_model_99th_percentile = GridSearchCV(xgboost_99th_percentile, parameters_xgboost_99th_percentile, n_jobs=1,
                                              cv=10, refit=True, return_train_score=True)
 
 xgboost_best_99th_percentile = xgboost_best_model_99th_percentile.fit(X=data_split_99th_percentile_xgboost[0],
@@ -593,7 +593,7 @@ parameters_svr_load_average_1_minute = {'kernel': ['rbf', 'poly', 'linear'], 'C'
 
 svr_load_average_1_minute = SVR(coef0=0.1, tol=0.001, shrinking=True, cache_size=200, verbose=False, max_iter=-1)
 
-svr_best_model_load_average_1_minute = GridSearchCV(svr_load_average_1_minute, parameters_svr_load_average_1_minute, cv=10, n_jobs=4,
+svr_best_model_load_average_1_minute = GridSearchCV(svr_load_average_1_minute, parameters_svr_load_average_1_minute, cv=10, n_jobs=1,
                                          return_train_score=True, refit=True, scoring='neg_mean_absolute_error')
 
 svr_best_load_average_1_minute = svr_best_model_load_average_1_minute.fit(data_split_load_average_1_minute_svr[0], data_split_load_average_1_minute_svr[1])
@@ -624,15 +624,15 @@ data_split_load_average_1_minute_xgboost_test = data_reader(csv_file=summary_dat
                                                  y_column_number=y_select_col_load_average_1_minute)
 # additional feature 10 = Concurrency / Message size
 
-parameters_xgboost_load_average_1_minute = {'max_depth': [3], 'learning_rate': [0.035], 'n_estimators': [200],
-                                 'min_child_weight': [2], 'max_delta_step': [0]}
+parameters_xgboost_load_average_1_minute = {'max_depth': [10], 'learning_rate': [0.02], 'n_estimators': [1000],
+                                 'min_child_weight': [0], 'max_delta_step': [0]}
 
 xgboost_load_average_1_minute = xgb.XGBRegressor(silent=True, objective='reg:linear', gamma=0,
                                       subsample=1, colsample_bytree=1, colsample_bylevel=1, reg_alpha=0,
                                       reg_lambda=1, scale_pos_weight=1, base_score=0.5, missing=None)
 
 
-xgboost_best_model_load_average_1_minute = GridSearchCV(xgboost_load_average_1_minute, parameters_xgboost_load_average_1_minute, n_jobs=4,
+xgboost_best_model_load_average_1_minute = GridSearchCV(xgboost_load_average_1_minute, parameters_xgboost_load_average_1_minute, n_jobs=1,
                                              cv=10, refit=True, return_train_score=True)
 
 xgboost_best_load_average_1_minute = xgboost_best_model_load_average_1_minute.fit(X=data_split_load_average_1_minute_xgboost[0],
@@ -683,7 +683,7 @@ parameters_svr_load_average_5_minute = {'kernel': ['rbf', 'poly', 'linear'], 'C'
 
 svr_load_average_5_minute = SVR(coef0=0.1, tol=0.001, shrinking=True, cache_size=200, verbose=False, max_iter=-1)
 
-svr_best_model_load_average_5_minute = GridSearchCV(svr_load_average_5_minute, parameters_svr_load_average_5_minute, cv=10, n_jobs=4,
+svr_best_model_load_average_5_minute = GridSearchCV(svr_load_average_5_minute, parameters_svr_load_average_5_minute, cv=10, n_jobs=1,
                                          return_train_score=True, refit=True, scoring='neg_mean_absolute_error')
 
 svr_best_load_average_5_minute = svr_best_model_load_average_5_minute.fit(data_split_load_average_5_minute_svr[0], data_split_load_average_5_minute_svr[1])
@@ -714,7 +714,7 @@ data_split_load_average_5_minute_xgboost_test = data_reader(csv_file=summary_dat
                                                  y_column_number=y_select_col_load_average_5_minute)
 # additional feature 10 = Concurrency / Message size
 
-parameters_xgboost_load_average_5_minute = {'max_depth': [3], 'learning_rate': [0.035], 'n_estimators': [200],
+parameters_xgboost_load_average_5_minute = {'max_depth': [10], 'learning_rate': [0.01], 'n_estimators': [1000],
                                  'min_child_weight': [2], 'max_delta_step': [0]}
 
 xgboost_load_average_5_minute = xgb.XGBRegressor(silent=True, objective='reg:linear', gamma=0,
@@ -722,7 +722,7 @@ xgboost_load_average_5_minute = xgb.XGBRegressor(silent=True, objective='reg:lin
                                       reg_lambda=1, scale_pos_weight=1, base_score=0.5, missing=None)
 
 
-xgboost_best_model_load_average_5_minute = GridSearchCV(xgboost_load_average_5_minute, parameters_xgboost_load_average_5_minute, n_jobs=4,
+xgboost_best_model_load_average_5_minute = GridSearchCV(xgboost_load_average_5_minute, parameters_xgboost_load_average_5_minute, n_jobs=1,
                                              cv=10, refit=True, return_train_score=True)
 
 xgboost_best_load_average_5_minute = xgboost_best_model_load_average_5_minute.fit(X=data_split_load_average_5_minute_xgboost[0],
@@ -763,17 +763,16 @@ data_split_load_average_15_minute_svr_test = data_reader(csv_file=summary_data_t
                                              thousands_splitter=t_splitter, csv_select_columns=csv_select_cols,
                                              x_column_numbers=x_select_cols_load_average_15_minute_svr,
                                              y_column_number=y_select_col_load_average_15_minute)
-# additional feature 10 = Concurrency / Message size
 
 
- ##################################################################################
+# ##################################################################################
 print "\n\n\nSVR Grid Search CV load_average_15_minute"
 parameters_svr_load_average_15_minute = {'kernel': ['rbf', 'poly', 'linear'], 'C': [1E2, 1E3],
                              'epsilon': [0.0001, 0.0005, 0.001, 0.005,  0.01, 0.05, 0.1, 0.5, 1, 5, 10]}
 
 svr_load_average_15_minute = SVR(coef0=0.1, tol=0.001, shrinking=True, cache_size=200, verbose=False, max_iter=-1)
 
-svr_best_model_load_average_15_minute = GridSearchCV(svr_load_average_15_minute, parameters_svr_load_average_15_minute, cv=10, n_jobs=4,
+svr_best_model_load_average_15_minute = GridSearchCV(svr_load_average_15_minute, parameters_svr_load_average_15_minute, cv=10, n_jobs=1,
                                          return_train_score=True, refit=True, scoring='neg_mean_absolute_error')
 
 svr_best_load_average_15_minute = svr_best_model_load_average_15_minute.fit(data_split_load_average_15_minute_svr[0], data_split_load_average_15_minute_svr[1])
@@ -804,7 +803,7 @@ data_split_load_average_15_minute_xgboost_test = data_reader(csv_file=summary_da
                                                  y_column_number=y_select_col_load_average_15_minute)
 # additional feature 10 = Concurrency / Message size
 
-parameters_xgboost_load_average_15_minute = {'max_depth': [3], 'learning_rate': [0.035], 'n_estimators': [200],
+parameters_xgboost_load_average_15_minute = {'max_depth': [3], 'learning_rate': [0.1], 'n_estimators': [500],
                                  'min_child_weight': [2], 'max_delta_step': [0]}
 
 xgboost_load_average_15_minute = xgb.XGBRegressor(silent=True, objective='reg:linear', gamma=0,
@@ -812,7 +811,7 @@ xgboost_load_average_15_minute = xgb.XGBRegressor(silent=True, objective='reg:li
                                       reg_lambda=1, scale_pos_weight=1, base_score=0.5, missing=None)
 
 
-xgboost_best_model_load_average_15_minute = GridSearchCV(xgboost_load_average_15_minute, parameters_xgboost_load_average_15_minute, n_jobs=4,
+xgboost_best_model_load_average_15_minute = GridSearchCV(xgboost_load_average_15_minute, parameters_xgboost_load_average_15_minute, n_jobs=1,
                                              cv=10, refit=True, return_train_score=True)
 
 xgboost_best_load_average_15_minute = xgboost_best_model_load_average_15_minute.fit(X=data_split_load_average_15_minute_xgboost[0],
