@@ -119,455 +119,455 @@ time1 = time.time()
 time2 = time.time()
 ###################################################################################
 # throughput
-# print "\n\n\nThroughput "
-#
-# data_split_throughput_svr = np.array([], dtype='float64')
-# data_split_throughput_svr = data_reader(csv_file=summary_data, total_row=n_rows, thousands_splitter=t_splitter,
-#                                         csv_select_columns=csv_select_cols,
-#                                         x_column_numbers=x_select_cols_throughput_svr,
-#                                         y_column_number=y_select_col_throughput)
-#
-# data_split_throughput_svr_test = np.array([], dtype='float64')
-# data_split_throughput_svr_test = data_reader(csv_file=summary_data_test, total_row=n_rows,
-#                                              thousands_splitter=t_splitter, csv_select_columns=csv_select_cols,
-#                                              x_column_numbers=x_select_cols_throughput_svr,
-#                                              y_column_number=y_select_col_throughput)
-# # additional feature 10 = Concurrency / Message size
-#
-#
-#  ##################################################################################
-# print "\n\n\nSVR Grid Search CV Throughput"
-# parameters_svr_throughput = {'kernel': ['rbf', 'poly', 'linear'], 'C': [1E2, 1E3],
-#                              'epsilon': [0.0001, 0.0005, 0.001, 0.005,  0.01, 0.05]}
-#
-# svr_throughput = SVR(coef0=0.1, tol=0.001, shrinking=True, cache_size=200, verbose=False, max_iter=-1)
-#
-# svr_best_model_throughput = GridSearchCV(svr_throughput, parameters_svr_throughput, cv=10, n_jobs=1,
-#                                          return_train_score=True, refit=True, scoring='neg_mean_absolute_error')
-#
-# svr_best_throughput = svr_best_model_throughput.fit(data_split_throughput_svr[0], data_split_throughput_svr[1])
-#
-# print array_print(data_split_throughput_svr_test[1])
-# print array_print(svr_best_model_throughput.predict(data_split_throughput_svr_test[0]))
-# print array_print(evaluator(data_split_throughput_svr[1],
-#                             svr_best_throughput.predict(data_split_throughput_svr[0])))
-# print array_print(evaluator(data_split_throughput_svr_test[1],
-#                             svr_best_throughput.predict(data_split_throughput_svr_test[0])))
-# print svr_best_throughput.best_params_
-# print 'time', time.time()-time2
+print "\n\n\nThroughput "
+
+data_split_throughput_svr = np.array([], dtype='float64')
+data_split_throughput_svr = data_reader(csv_file=summary_data, total_row=n_rows, thousands_splitter=t_splitter,
+                                        csv_select_columns=csv_select_cols,
+                                        x_column_numbers=x_select_cols_throughput_svr,
+                                        y_column_number=y_select_col_throughput)
+
+data_split_throughput_svr_test = np.array([], dtype='float64')
+data_split_throughput_svr_test = data_reader(csv_file=summary_data_test, total_row=n_rows,
+                                             thousands_splitter=t_splitter, csv_select_columns=csv_select_cols,
+                                             x_column_numbers=x_select_cols_throughput_svr,
+                                             y_column_number=y_select_col_throughput)
+# additional feature 10 = Concurrency / Message size
+
+
+ ##################################################################################
+print "\n\n\nSVR Grid Search CV Throughput"
+parameters_svr_throughput = {'kernel': ['rbf', 'poly', 'linear'], 'C': [1E2, 1E3],
+                             'epsilon': [0.0001, 0.0005, 0.001, 0.005,  0.01, 0.05]}
+
+svr_throughput = SVR(coef0=0.1, tol=0.001, shrinking=True, cache_size=200, verbose=False, max_iter=-1)
+
+svr_best_model_throughput = GridSearchCV(svr_throughput, parameters_svr_throughput, cv=10, n_jobs=1,
+                                         return_train_score=True, refit=True, scoring='neg_mean_absolute_error')
+
+svr_best_throughput = svr_best_model_throughput.fit(data_split_throughput_svr[0], data_split_throughput_svr[1])
+
+print array_print(data_split_throughput_svr_test[1])
+print array_print(svr_best_model_throughput.predict(data_split_throughput_svr_test[0]))
+print array_print(evaluator(data_split_throughput_svr[1],
+                            svr_best_throughput.predict(data_split_throughput_svr[0])))
+print array_print(evaluator(data_split_throughput_svr_test[1],
+                            svr_best_throughput.predict(data_split_throughput_svr_test[0])))
+print svr_best_throughput.best_params_
+print 'time', time.time()-time2
+#############################################################################
+
+
+print "\n\n\nXGBoost Grid Search CV Throughput "
+
+data_split_throughput_xgboost = np.array([], dtype='float64')
+data_split_throughput_xgboost = data_reader(csv_file=summary_data, total_row=n_rows, thousands_splitter=t_splitter,
+                                            csv_select_columns=csv_select_cols,
+                                            x_column_numbers=x_select_cols_throughput_xgboost,
+                                            y_column_number=y_select_col_throughput)
+
+data_split_throughput_xgboost_test = np.array([], dtype='float64')
+data_split_throughput_xgboost_test = data_reader(csv_file=summary_data_test, total_row=n_rows,
+                                                 thousands_splitter=t_splitter, csv_select_columns=csv_select_cols,
+                                                 x_column_numbers=x_select_cols_throughput_xgboost,
+                                                 y_column_number=y_select_col_throughput)
+# additional feature 10 = Concurrency / Message size
+
+parameters_xgboost_throughput = {'max_depth': [3], 'learning_rate': [0.03], 'n_estimators': [80],
+                                 'min_child_weight': [2], 'max_delta_step': [0]}
+
+xgboost_throughput = xgb.XGBRegressor(silent=True, objective='reg:linear', gamma=0,
+                                      subsample=1, colsample_bytree=1, colsample_bylevel=1, reg_alpha=0,
+                                      reg_lambda=1, scale_pos_weight=1, base_score=0.5, missing=None)
+
+
+xgboost_best_model_throughput = GridSearchCV(xgboost_throughput, parameters_xgboost_throughput, n_jobs=1,
+                                             cv=10, refit=True, return_train_score=True)
+
+xgboost_best_throughput = xgboost_best_model_throughput.fit(X=data_split_throughput_xgboost[0],
+                                                            y=data_split_throughput_xgboost[1],
+                                                            eval_set=[(data_split_throughput_xgboost[0],
+                                                                       data_split_throughput_xgboost[1]),
+                                                                      (data_split_throughput_xgboost_test[0],
+                                                                       data_split_throughput_xgboost_test[1])],
+                                                            eval_metric='mae', early_stopping_rounds=10)
+
+print array_print(data_split_throughput_xgboost_test[1])
+print array_print( xgboost_best_throughput.predict(data_split_throughput_xgboost_test[0]))
+print array_print(evaluator(data_split_throughput_xgboost[1],
+                            xgboost_best_throughput.predict(data_split_throughput_xgboost[0])))
+print array_print(evaluator(data_split_throughput_xgboost_test[1],
+                            xgboost_best_throughput.predict(data_split_throughput_xgboost_test[0])))
+
+print (time.time()-time2)
+# ###########################################################################
+
+
+
+time1 = time.time()
+time2 = time.time()
+###################################################################################
+# latency
+print "\n\n\nlatency "
+
+data_split_latency_svr = np.array([], dtype='float64')
+data_split_latency_svr = data_reader(csv_file=summary_data, total_row=n_rows, thousands_splitter=t_splitter,
+                                        csv_select_columns=csv_select_cols,
+                                        x_column_numbers=x_select_cols_latency_svr,
+                                        y_column_number=y_select_col_latency)
+
+data_split_latency_svr_test = np.array([], dtype='float64')
+data_split_latency_svr_test = data_reader(csv_file=summary_data_test, total_row=n_rows,
+                                             thousands_splitter=t_splitter, csv_select_columns=csv_select_cols,
+                                             x_column_numbers=x_select_cols_latency_svr,
+                                             y_column_number=y_select_col_latency)
+# additional feature 10 = Concurrency / Message size
+
+
+ ##################################################################################
+print "\n\n\nSVR Grid Search CV latency"
+parameters_svr_latency = {'kernel': ['rbf', 'poly', 'linear'], 'C': [1E2, 1E3],
+                             'epsilon': [0.0001, 0.0005, 0.001, 0.005,  0.01, 0.05, 0.1, 0.5, 1, 5, 10]}
+
+svr_latency = SVR(coef0=0.1, tol=0.001, shrinking=True, cache_size=200, verbose=False, max_iter=-1)
+
+svr_best_model_latency = GridSearchCV(svr_latency, parameters_svr_latency, cv=10, n_jobs=1,
+                                         return_train_score=True, refit=True, scoring='neg_mean_absolute_error')
+
+svr_best_latency = svr_best_model_latency.fit(data_split_latency_svr[0], data_split_latency_svr[1])
+
+print array_print(data_split_latency_svr_test[1])
+print array_print(svr_best_model_latency.predict(data_split_latency_svr_test[0]))
+print array_print(evaluator(data_split_latency_svr[1],
+                            svr_best_latency.predict(data_split_latency_svr[0])))
+print array_print(evaluator(data_split_latency_svr_test[1],
+                            svr_best_latency.predict(data_split_latency_svr_test[0])))
+
+print 'time', time.time()-time2
+#############################################################################
+
+
+print "\n\n\nXGBoost Grid Search CV latency "
+
+data_split_latency_xgboost = np.array([], dtype='float64')
+data_split_latency_xgboost = data_reader(csv_file=summary_data, total_row=n_rows, thousands_splitter=t_splitter,
+                                            csv_select_columns=csv_select_cols,
+                                            x_column_numbers=x_select_cols_latency_xgboost,
+                                            y_column_number=y_select_col_latency)
+
+data_split_latency_xgboost_test = np.array([], dtype='float64')
+data_split_latency_xgboost_test = data_reader(csv_file=summary_data_test, total_row=n_rows,
+                                                 thousands_splitter=t_splitter, csv_select_columns=csv_select_cols,
+                                                 x_column_numbers=x_select_cols_latency_xgboost,
+                                                 y_column_number=y_select_col_latency)
+# additional feature 10 = Concurrency / Message size
+
+parameters_xgboost_latency = {'max_depth': [5], 'learning_rate': [0.005], 'n_estimators': [1000],
+                                 'min_child_weight': [1], 'max_delta_step': [0]}
+
+xgboost_latency = xgb.XGBRegressor(silent=True, objective='reg:linear', gamma=0,
+                                      subsample=1, colsample_bytree=1, colsample_bylevel=1, reg_alpha=0,
+                                      reg_lambda=1, scale_pos_weight=1, base_score=0.5, missing=None)
+
+
+xgboost_best_model_latency = GridSearchCV(xgboost_latency, parameters_xgboost_latency, n_jobs=1,
+                                             cv=10, refit=True, return_train_score=True)
+
+xgboost_best_latency = xgboost_best_model_latency.fit(X=data_split_latency_xgboost[0],
+                                                            y=data_split_latency_xgboost[1],
+                                                            eval_set=[(data_split_latency_xgboost[0],
+                                                                       data_split_latency_xgboost[1]),
+                                                                      (data_split_latency_xgboost_test[0],
+                                                                       data_split_latency_xgboost_test[1])],
+                                                            eval_metric='mae', early_stopping_rounds=10)
+
+
+print array_print(data_split_latency_xgboost_test[1])
+print array_print( xgboost_best_latency.predict(data_split_latency_xgboost_test[0]))
+print array_print(evaluator(data_split_latency_xgboost[1],
+                            xgboost_best_latency.predict(data_split_latency_xgboost[0])))
+print array_print(evaluator(data_split_latency_xgboost_test[1],
+                            xgboost_best_latency.predict(data_split_latency_xgboost_test[0])))
+
+print (time.time()-time2)
+###########################################################################
+
+
+
+time1 = time.time()
+time2 = time.time()
+###################################################################################
+# 90th_percentile
+print "\n\n\n90th_percentile "
+
+data_split_90th_percentile_svr = np.array([], dtype='float64')
+data_split_90th_percentile_svr = data_reader(csv_file=summary_data, total_row=n_rows, thousands_splitter=t_splitter,
+                                        csv_select_columns=csv_select_cols,
+                                        x_column_numbers=x_select_cols_90th_percentile_svr,
+                                        y_column_number=y_select_col_90th_percentile)
+
+data_split_90th_percentile_svr_test = np.array([], dtype='float64')
+data_split_90th_percentile_svr_test = data_reader(csv_file=summary_data_test, total_row=n_rows,
+                                             thousands_splitter=t_splitter, csv_select_columns=csv_select_cols,
+                                             x_column_numbers=x_select_cols_90th_percentile_svr,
+                                             y_column_number=y_select_col_90th_percentile)
+# additional feature 10 = Concurrency / Message size
+
+
+ ##################################################################################
+print "\n\n\nSVR Grid Search CV 90th_percentile"
+parameters_svr_90th_percentile = {'kernel': ['rbf', 'poly', 'linear'], 'C': [1E2, 1E3],
+                             'epsilon': [0.0001, 0.0005, 0.001, 0.005,  0.01, 0.05, 0.1, 0.5, 1, 5, 10]}
+
+svr_90th_percentile = SVR(coef0=0.1, tol=0.001, shrinking=True, cache_size=200, verbose=False, max_iter=-1)
+
+svr_best_model_90th_percentile = GridSearchCV(svr_90th_percentile, parameters_svr_90th_percentile, cv=10, n_jobs=1,
+                                         return_train_score=True, refit=True, scoring='neg_mean_absolute_error')
+
+svr_best_90th_percentile = svr_best_model_90th_percentile.fit(data_split_90th_percentile_svr[0], data_split_90th_percentile_svr[1])
+
+print array_print(data_split_90th_percentile_svr_test[1])
+print array_print(svr_best_model_90th_percentile.predict(data_split_90th_percentile_svr_test[0]))
+print array_print(evaluator(data_split_90th_percentile_svr[1],
+                            svr_best_90th_percentile.predict(data_split_90th_percentile_svr[0])))
+print array_print(evaluator(data_split_90th_percentile_svr_test[1],
+                            svr_best_90th_percentile.predict(data_split_90th_percentile_svr_test[0])))
+
+print 'time', time.time()-time2
 # #############################################################################
 
-#
-# print "\n\n\nXGBoost Grid Search CV Throughput "
-#
-# data_split_throughput_xgboost = np.array([], dtype='float64')
-# data_split_throughput_xgboost = data_reader(csv_file=summary_data, total_row=n_rows, thousands_splitter=t_splitter,
-#                                             csv_select_columns=csv_select_cols,
-#                                             x_column_numbers=x_select_cols_throughput_xgboost,
-#                                             y_column_number=y_select_col_throughput)
-#
-# data_split_throughput_xgboost_test = np.array([], dtype='float64')
-# data_split_throughput_xgboost_test = data_reader(csv_file=summary_data_test, total_row=n_rows,
-#                                                  thousands_splitter=t_splitter, csv_select_columns=csv_select_cols,
-#                                                  x_column_numbers=x_select_cols_throughput_xgboost,
-#                                                  y_column_number=y_select_col_throughput)
-# # additional feature 10 = Concurrency / Message size
-#
-# parameters_xgboost_throughput = {'max_depth': [3], 'learning_rate': [0.03], 'n_estimators': [80],
-#                                  'min_child_weight': [2], 'max_delta_step': [0]}
-#
-# xgboost_throughput = xgb.XGBRegressor(silent=True, objective='reg:linear', gamma=0,
-#                                       subsample=1, colsample_bytree=1, colsample_bylevel=1, reg_alpha=0,
-#                                       reg_lambda=1, scale_pos_weight=1, base_score=0.5, missing=None)
-#
-#
-# xgboost_best_model_throughput = GridSearchCV(xgboost_throughput, parameters_xgboost_throughput, n_jobs=1,
-#                                              cv=10, refit=True, return_train_score=True)
-#
-# xgboost_best_throughput = xgboost_best_model_throughput.fit(X=data_split_throughput_xgboost[0],
-#                                                             y=data_split_throughput_xgboost[1],
-#                                                             eval_set=[(data_split_throughput_xgboost[0],
-#                                                                        data_split_throughput_xgboost[1]),
-#                                                                       (data_split_throughput_xgboost_test[0],
-#                                                                        data_split_throughput_xgboost_test[1])],
-#                                                             eval_metric='mae', early_stopping_rounds=10)
-#
-# print array_print(data_split_throughput_xgboost_test[1])
-# print array_print( xgboost_best_throughput.predict(data_split_throughput_xgboost_test[0]))
-# print array_print(evaluator(data_split_throughput_xgboost[1],
-#                             xgboost_best_throughput.predict(data_split_throughput_xgboost[0])))
-# print array_print(evaluator(data_split_throughput_xgboost_test[1],
-#                             xgboost_best_throughput.predict(data_split_throughput_xgboost_test[0])))
-#
-# print (time.time()-time2)
-# # ###########################################################################
-#
-#
-#
-# time1 = time.time()
-# time2 = time.time()
-# ###################################################################################
-# latency
-# print "\n\n\nlatency "
-#
-# data_split_latency_svr = np.array([], dtype='float64')
-# data_split_latency_svr = data_reader(csv_file=summary_data, total_row=n_rows, thousands_splitter=t_splitter,
-#                                         csv_select_columns=csv_select_cols,
-#                                         x_column_numbers=x_select_cols_latency_svr,
-#                                         y_column_number=y_select_col_latency)
-#
-# data_split_latency_svr_test = np.array([], dtype='float64')
-# data_split_latency_svr_test = data_reader(csv_file=summary_data_test, total_row=n_rows,
-#                                              thousands_splitter=t_splitter, csv_select_columns=csv_select_cols,
-#                                              x_column_numbers=x_select_cols_latency_svr,
-#                                              y_column_number=y_select_col_latency)
-# # additional feature 10 = Concurrency / Message size
-#
-#
-#  ##################################################################################
-# print "\n\n\nSVR Grid Search CV latency"
-# parameters_svr_latency = {'kernel': ['rbf', 'poly', 'linear'], 'C': [1E2, 1E3],
-#                              'epsilon': [0.0001, 0.0005, 0.001, 0.005,  0.01, 0.05, 0.1, 0.5, 1, 5, 10]}
-#
-# svr_latency = SVR(coef0=0.1, tol=0.001, shrinking=True, cache_size=200, verbose=False, max_iter=-1)
-#
-# svr_best_model_latency = GridSearchCV(svr_latency, parameters_svr_latency, cv=10, n_jobs=1,
-#                                          return_train_score=True, refit=True, scoring='neg_mean_absolute_error')
-#
-# svr_best_latency = svr_best_model_latency.fit(data_split_latency_svr[0], data_split_latency_svr[1])
-#
-# print array_print(data_split_latency_svr_test[1])
-# print array_print(svr_best_model_latency.predict(data_split_latency_svr_test[0]))
-# print array_print(evaluator(data_split_latency_svr[1],
-#                             svr_best_latency.predict(data_split_latency_svr[0])))
-# print array_print(evaluator(data_split_latency_svr_test[1],
-#                             svr_best_latency.predict(data_split_latency_svr_test[0])))
-#
-# print 'time', time.time()-time2
-# #############################################################################
-#
-#
-# print "\n\n\nXGBoost Grid Search CV latency "
-#
-# data_split_latency_xgboost = np.array([], dtype='float64')
-# data_split_latency_xgboost = data_reader(csv_file=summary_data, total_row=n_rows, thousands_splitter=t_splitter,
-#                                             csv_select_columns=csv_select_cols,
-#                                             x_column_numbers=x_select_cols_latency_xgboost,
-#                                             y_column_number=y_select_col_latency)
-#
-# data_split_latency_xgboost_test = np.array([], dtype='float64')
-# data_split_latency_xgboost_test = data_reader(csv_file=summary_data_test, total_row=n_rows,
-#                                                  thousands_splitter=t_splitter, csv_select_columns=csv_select_cols,
-#                                                  x_column_numbers=x_select_cols_latency_xgboost,
-#                                                  y_column_number=y_select_col_latency)
-# # additional feature 10 = Concurrency / Message size
-#
-# parameters_xgboost_latency = {'max_depth': [5], 'learning_rate': [0.005], 'n_estimators': [1000],
-#                                  'min_child_weight': [1], 'max_delta_step': [0]}
-#
-# xgboost_latency = xgb.XGBRegressor(silent=True, objective='reg:linear', gamma=0,
-#                                       subsample=1, colsample_bytree=1, colsample_bylevel=1, reg_alpha=0,
-#                                       reg_lambda=1, scale_pos_weight=1, base_score=0.5, missing=None)
-#
-#
-# xgboost_best_model_latency = GridSearchCV(xgboost_latency, parameters_xgboost_latency, n_jobs=1,
-#                                              cv=10, refit=True, return_train_score=True)
-#
-# xgboost_best_latency = xgboost_best_model_latency.fit(X=data_split_latency_xgboost[0],
-#                                                             y=data_split_latency_xgboost[1],
-#                                                             eval_set=[(data_split_latency_xgboost[0],
-#                                                                        data_split_latency_xgboost[1]),
-#                                                                       (data_split_latency_xgboost_test[0],
-#                                                                        data_split_latency_xgboost_test[1])],
-#                                                             eval_metric='mae', early_stopping_rounds=10)
-#
-#
-# print array_print(data_split_latency_xgboost_test[1])
-# print array_print( xgboost_best_latency.predict(data_split_latency_xgboost_test[0]))
-# print array_print(evaluator(data_split_latency_xgboost[1],
-#                             xgboost_best_latency.predict(data_split_latency_xgboost[0])))
-# print array_print(evaluator(data_split_latency_xgboost_test[1],
-#                             xgboost_best_latency.predict(data_split_latency_xgboost_test[0])))
-#
-# print (time.time()-time2)
+
+print "\n\n\nXGBoost Grid Search CV 90th_percentile "
+
+data_split_90th_percentile_xgboost = np.array([], dtype='float64')
+data_split_90th_percentile_xgboost = data_reader(csv_file=summary_data, total_row=n_rows, thousands_splitter=t_splitter,
+                                            csv_select_columns=csv_select_cols,
+                                            x_column_numbers=x_select_cols_90th_percentile_xgboost,
+                                            y_column_number=y_select_col_90th_percentile)
+
+data_split_90th_percentile_xgboost_test = np.array([], dtype='float64')
+data_split_90th_percentile_xgboost_test = data_reader(csv_file=summary_data_test, total_row=n_rows,
+                                                 thousands_splitter=t_splitter, csv_select_columns=csv_select_cols,
+                                                 x_column_numbers=x_select_cols_90th_percentile_xgboost,
+                                                 y_column_number=y_select_col_90th_percentile)
+# additional feature 10 = Concurrency / Message size
+
+parameters_xgboost_90th_percentile = {'max_depth': [5], 'learning_rate': [0.009], 'n_estimators': [1000],
+                                 'min_child_weight': [1], 'max_delta_step': [0]}
+
+xgboost_90th_percentile = xgb.XGBRegressor(silent=True, objective='reg:linear', gamma=0,
+                                      subsample=1, colsample_bytree=1, colsample_bylevel=1, reg_alpha=0,
+                                      reg_lambda=1, scale_pos_weight=1, base_score=0.5, missing=None)
+
+
+xgboost_best_model_90th_percentile = GridSearchCV(xgboost_90th_percentile, parameters_xgboost_90th_percentile, n_jobs=1,
+                                             cv=10, refit=True, return_train_score=True)
+
+xgboost_best_90th_percentile = xgboost_best_model_90th_percentile.fit(X=data_split_90th_percentile_xgboost[0],
+                                                            y=data_split_90th_percentile_xgboost[1],
+                                                            eval_set=[(data_split_90th_percentile_xgboost[0],
+                                                                       data_split_90th_percentile_xgboost[1]),
+                                                                      (data_split_90th_percentile_xgboost_test[0],
+                                                                       data_split_90th_percentile_xgboost_test[1])],
+                                                            eval_metric='mae', early_stopping_rounds=10)
+
+
+print array_print(data_split_90th_percentile_xgboost_test[1])
+print array_print( xgboost_best_90th_percentile.predict(data_split_90th_percentile_xgboost_test[0]))
+print array_print(evaluator(data_split_90th_percentile_xgboost[1],
+                            xgboost_best_90th_percentile.predict(data_split_90th_percentile_xgboost[0])))
+print array_print(evaluator(data_split_90th_percentile_xgboost_test[1],
+                            xgboost_best_90th_percentile.predict(data_split_90th_percentile_xgboost_test[0])))
+
+print (time.time()-time2)
 # ###########################################################################
-#
-#
-#
-# time1 = time.time()
-# time2 = time.time()
-# ###################################################################################
-# # 90th_percentile
-# print "\n\n\n90th_percentile "
-#
-# data_split_90th_percentile_svr = np.array([], dtype='float64')
-# data_split_90th_percentile_svr = data_reader(csv_file=summary_data, total_row=n_rows, thousands_splitter=t_splitter,
-#                                         csv_select_columns=csv_select_cols,
-#                                         x_column_numbers=x_select_cols_90th_percentile_svr,
-#                                         y_column_number=y_select_col_90th_percentile)
-#
-# data_split_90th_percentile_svr_test = np.array([], dtype='float64')
-# data_split_90th_percentile_svr_test = data_reader(csv_file=summary_data_test, total_row=n_rows,
-#                                              thousands_splitter=t_splitter, csv_select_columns=csv_select_cols,
-#                                              x_column_numbers=x_select_cols_90th_percentile_svr,
-#                                              y_column_number=y_select_col_90th_percentile)
-# # additional feature 10 = Concurrency / Message size
-#
-#
-#  ##################################################################################
-# print "\n\n\nSVR Grid Search CV 90th_percentile"
-# parameters_svr_90th_percentile = {'kernel': ['rbf', 'poly', 'linear'], 'C': [1E2, 1E3],
-#                              'epsilon': [0.0001, 0.0005, 0.001, 0.005,  0.01, 0.05, 0.1, 0.5, 1, 5, 10]}
-#
-# svr_90th_percentile = SVR(coef0=0.1, tol=0.001, shrinking=True, cache_size=200, verbose=False, max_iter=-1)
-#
-# svr_best_model_90th_percentile = GridSearchCV(svr_90th_percentile, parameters_svr_90th_percentile, cv=10, n_jobs=1,
-#                                          return_train_score=True, refit=True, scoring='neg_mean_absolute_error')
-#
-# svr_best_90th_percentile = svr_best_model_90th_percentile.fit(data_split_90th_percentile_svr[0], data_split_90th_percentile_svr[1])
-#
-# print array_print(data_split_90th_percentile_svr_test[1])
-# print array_print(svr_best_model_90th_percentile.predict(data_split_90th_percentile_svr_test[0]))
-# print array_print(evaluator(data_split_90th_percentile_svr[1],
-#                             svr_best_90th_percentile.predict(data_split_90th_percentile_svr[0])))
-# print array_print(evaluator(data_split_90th_percentile_svr_test[1],
-#                             svr_best_90th_percentile.predict(data_split_90th_percentile_svr_test[0])))
-#
-# print 'time', time.time()-time2
-# # #############################################################################
-#
-#
-# print "\n\n\nXGBoost Grid Search CV 90th_percentile "
-#
-# data_split_90th_percentile_xgboost = np.array([], dtype='float64')
-# data_split_90th_percentile_xgboost = data_reader(csv_file=summary_data, total_row=n_rows, thousands_splitter=t_splitter,
-#                                             csv_select_columns=csv_select_cols,
-#                                             x_column_numbers=x_select_cols_90th_percentile_xgboost,
-#                                             y_column_number=y_select_col_90th_percentile)
-#
-# data_split_90th_percentile_xgboost_test = np.array([], dtype='float64')
-# data_split_90th_percentile_xgboost_test = data_reader(csv_file=summary_data_test, total_row=n_rows,
-#                                                  thousands_splitter=t_splitter, csv_select_columns=csv_select_cols,
-#                                                  x_column_numbers=x_select_cols_90th_percentile_xgboost,
-#                                                  y_column_number=y_select_col_90th_percentile)
-# # additional feature 10 = Concurrency / Message size
-#
-# parameters_xgboost_90th_percentile = {'max_depth': [5], 'learning_rate': [0.009], 'n_estimators': [1000],
-#                                  'min_child_weight': [1], 'max_delta_step': [0]}
-#
-# xgboost_90th_percentile = xgb.XGBRegressor(silent=True, objective='reg:linear', gamma=0,
-#                                       subsample=1, colsample_bytree=1, colsample_bylevel=1, reg_alpha=0,
-#                                       reg_lambda=1, scale_pos_weight=1, base_score=0.5, missing=None)
-#
-#
-# xgboost_best_model_90th_percentile = GridSearchCV(xgboost_90th_percentile, parameters_xgboost_90th_percentile, n_jobs=1,
-#                                              cv=10, refit=True, return_train_score=True)
-#
-# xgboost_best_90th_percentile = xgboost_best_model_90th_percentile.fit(X=data_split_90th_percentile_xgboost[0],
-#                                                             y=data_split_90th_percentile_xgboost[1],
-#                                                             eval_set=[(data_split_90th_percentile_xgboost[0],
-#                                                                        data_split_90th_percentile_xgboost[1]),
-#                                                                       (data_split_90th_percentile_xgboost_test[0],
-#                                                                        data_split_90th_percentile_xgboost_test[1])],
-#                                                             eval_metric='mae', early_stopping_rounds=10)
-#
-#
-# print array_print(data_split_90th_percentile_xgboost_test[1])
-# print array_print( xgboost_best_90th_percentile.predict(data_split_90th_percentile_xgboost_test[0]))
-# print array_print(evaluator(data_split_90th_percentile_xgboost[1],
-#                             xgboost_best_90th_percentile.predict(data_split_90th_percentile_xgboost[0])))
-# print array_print(evaluator(data_split_90th_percentile_xgboost_test[1],
-#                             xgboost_best_90th_percentile.predict(data_split_90th_percentile_xgboost_test[0])))
-#
-# print (time.time()-time2)
-# # ###########################################################################
-#
-#
-#
-# time1 = time.time()
-# time2 = time.time()
-# ###################################################################################
+
+
+
+time1 = time.time()
+time2 = time.time()
+###################################################################################
 # 95th_percentile
-# print "\n\n\n95th_percentile "
-#
-# data_split_95th_percentile_svr = np.array([], dtype='float64')
-# data_split_95th_percentile_svr = data_reader(csv_file=summary_data, total_row=n_rows, thousands_splitter=t_splitter,
-#                                         csv_select_columns=csv_select_cols,
-#                                         x_column_numbers=x_select_cols_95th_percentile_svr,
-#                                         y_column_number=y_select_col_95th_percentile)
-#
-# data_split_95th_percentile_svr_test = np.array([], dtype='float64')
-# data_split_95th_percentile_svr_test = data_reader(csv_file=summary_data_test, total_row=n_rows,
-#                                              thousands_splitter=t_splitter, csv_select_columns=csv_select_cols,
-#                                              x_column_numbers=x_select_cols_95th_percentile_svr,
-#                                              y_column_number=y_select_col_95th_percentile)
-# # additional feature 10 = Concurrency / Message size
-#
-#
-#  ##################################################################################
-# print "\n\n\nSVR Grid Search CV 95th_percentile"
-# parameters_svr_95th_percentile = {'kernel': ['rbf', 'poly', 'linear'], 'C': [1E2, 1E3],
-#                              'epsilon': [0.0001, 0.0005, 0.001, 0.005,  0.01, 0.05, 0.1, 0.5, 1, 5, 10]}
-#
-# svr_95th_percentile = SVR(coef0=0.1, tol=0.001, shrinking=True, cache_size=200, verbose=False, max_iter=-1)
-#
-# svr_best_model_95th_percentile = GridSearchCV(svr_95th_percentile, parameters_svr_95th_percentile, cv=10, n_jobs=1,
-#                                          return_train_score=True, refit=True, scoring='neg_mean_absolute_error')
-#
-# svr_best_95th_percentile = svr_best_model_95th_percentile.fit(data_split_95th_percentile_svr[0], data_split_95th_percentile_svr[1])
-#
-# print array_print(data_split_95th_percentile_svr_test[1])
-# print array_print(svr_best_model_95th_percentile.predict(data_split_95th_percentile_svr_test[0]))
-# print array_print(evaluator(data_split_95th_percentile_svr[1],
-#                             svr_best_95th_percentile.predict(data_split_95th_percentile_svr[0])))
-# print array_print(evaluator(data_split_95th_percentile_svr_test[1],
-#                             svr_best_95th_percentile.predict(data_split_95th_percentile_svr_test[0])))
-#
-# print 'time', time.time()-time2
-# # #############################################################################
-#
-#
-# print "\n\n\nXGBoost Grid Search CV 95th_percentile "
-#
-# data_split_95th_percentile_xgboost = np.array([], dtype='float64')
-# data_split_95th_percentile_xgboost = data_reader(csv_file=summary_data, total_row=n_rows, thousands_splitter=t_splitter,
-#                                             csv_select_columns=csv_select_cols,
-#                                             x_column_numbers=x_select_cols_95th_percentile_xgboost,
-#                                             y_column_number=y_select_col_95th_percentile)
-#
-# data_split_95th_percentile_xgboost_test = np.array([], dtype='float64')
-# data_split_95th_percentile_xgboost_test = data_reader(csv_file=summary_data_test, total_row=n_rows,
-#                                                  thousands_splitter=t_splitter, csv_select_columns=csv_select_cols,
-#                                                  x_column_numbers=x_select_cols_95th_percentile_xgboost,
-#                                                  y_column_number=y_select_col_95th_percentile)
-# # additional feature 10 = Concurrency / Message size
-#
-# parameters_xgboost_95th_percentile = {'max_depth': [3], 'learning_rate': [0.025], 'n_estimators': [800],
-#                                  'min_child_weight': [2], 'max_delta_step': [0]}
-#
-# xgboost_95th_percentile = xgb.XGBRegressor(silent=True, objective='reg:linear', gamma=0,
-#                                       subsample=1, colsample_bytree=1, colsample_bylevel=1, reg_alpha=0,
-#                                       reg_lambda=1, scale_pos_weight=1, base_score=0.5, missing=None)
-#
-#
-# xgboost_best_model_95th_percentile = GridSearchCV(xgboost_95th_percentile, parameters_xgboost_95th_percentile, n_jobs=1,
-#                                              cv=10, refit=True, return_train_score=True)
-#
-# xgboost_best_95th_percentile = xgboost_best_model_95th_percentile.fit(X=data_split_95th_percentile_xgboost[0],
-#                                                             y=data_split_95th_percentile_xgboost[1],
-#                                                             eval_set=[(data_split_95th_percentile_xgboost[0],
-#                                                                        data_split_95th_percentile_xgboost[1]),
-#                                                                       (data_split_95th_percentile_xgboost_test[0],
-#                                                                        data_split_95th_percentile_xgboost_test[1])],
-#                                                             eval_metric='mae', early_stopping_rounds=10)
-#
-#
-# print array_print(data_split_95th_percentile_xgboost_test[1])
-# print array_print( xgboost_best_95th_percentile.predict(data_split_95th_percentile_xgboost_test[0]))
-# print array_print(evaluator(data_split_95th_percentile_xgboost[1],
-#                             xgboost_best_95th_percentile.predict(data_split_95th_percentile_xgboost[0])))
-# print array_print(evaluator(data_split_95th_percentile_xgboost_test[1],
-#                             xgboost_best_95th_percentile.predict(data_split_95th_percentile_xgboost_test[0])))
-#
-# print (time.time()-time2)
-# # ###########################################################################
-#
-#
-#
-# time1 = time.time()
-# time2 = time.time()
-# ###################################################################################
-# # 99th_percentile
-# print "\n\n\n99th_percentile "
-#
-# data_split_99th_percentile_svr = np.array([], dtype='float64')
-# data_split_99th_percentile_svr = data_reader(csv_file=summary_data, total_row=n_rows, thousands_splitter=t_splitter,
-#                                         csv_select_columns=csv_select_cols,
-#                                         x_column_numbers=x_select_cols_99th_percentile_svr,
-#                                         y_column_number=y_select_col_99th_percentile)
-#
-# data_split_99th_percentile_svr_test = np.array([], dtype='float64')
-# data_split_99th_percentile_svr_test = data_reader(csv_file=summary_data_test, total_row=n_rows,
-#                                              thousands_splitter=t_splitter, csv_select_columns=csv_select_cols,
-#                                              x_column_numbers=x_select_cols_99th_percentile_svr,
-#                                              y_column_number=y_select_col_99th_percentile)
-# # additional feature 10 = Concurrency / Message size
-#
-#
-# #  #################################################################################
-# print "\n\n\nSVR Grid Search CV 99th_percentile"
-# parameters_svr_99th_percentile = {'kernel': ['rbf', 'poly', 'linear'], 'C': [1E2, 1E3],
-#                              'epsilon': [0.0001, 0.0005, 0.001, 0.005,  0.01, 0.05, 0.1, 0.5, 1, 5, 10]}
-#
-# svr_99th_percentile = SVR(coef0=0.1, tol=0.001, shrinking=True, cache_size=200, verbose=False, max_iter=-1)
-#
-# svr_best_model_99th_percentile = GridSearchCV(svr_99th_percentile, parameters_svr_99th_percentile, cv=10, n_jobs=1,
-#                                          return_train_score=True, refit=True, scoring='neg_mean_absolute_error')
-#
-# svr_best_99th_percentile = svr_best_model_99th_percentile.fit(data_split_99th_percentile_svr[0], data_split_99th_percentile_svr[1])
-#
-# print array_print(data_split_99th_percentile_svr_test[1])
-# print array_print(svr_best_model_99th_percentile.predict(data_split_99th_percentile_svr_test[0]))
-# print array_print(evaluator(data_split_99th_percentile_svr[1],
-#                             svr_best_99th_percentile.predict(data_split_99th_percentile_svr[0])))
-# print array_print(evaluator(data_split_99th_percentile_svr_test[1],
-#                             svr_best_99th_percentile.predict(data_split_99th_percentile_svr_test[0])))
-#
-# print 'time', time.time()-time2
-# # #############################################################################
-#
-#
-# print "\n\n\nXGBoost Grid Search CV 99th_percentile "
-#
-# data_split_99th_percentile_xgboost = np.array([], dtype='float64')
-# data_split_99th_percentile_xgboost = data_reader(csv_file=summary_data, total_row=n_rows, thousands_splitter=t_splitter,
-#                                             csv_select_columns=csv_select_cols,
-#                                             x_column_numbers=x_select_cols_99th_percentile_xgboost,
-#                                             y_column_number=y_select_col_99th_percentile)
-#
-# data_split_99th_percentile_xgboost_test = np.array([], dtype='float64')
-# data_split_99th_percentile_xgboost_test = data_reader(csv_file=summary_data_test, total_row=n_rows,
-#                                                  thousands_splitter=t_splitter, csv_select_columns=csv_select_cols,
-#                                                  x_column_numbers=x_select_cols_99th_percentile_xgboost,
-#                                                  y_column_number=y_select_col_99th_percentile)
-# # additional feature 10 = Concurrency / Message size
-#
-# parameters_xgboost_99th_percentile = {'max_depth': [4], 'learning_rate': [0.03], 'n_estimators': [1000],
-#                                  'min_child_weight': [2], 'max_delta_step': [0]}
-#
-# xgboost_99th_percentile = xgb.XGBRegressor(silent=True, objective='reg:linear', gamma=0,
-#                                       subsample=1, colsample_bytree=1, colsample_bylevel=1, reg_alpha=0,
-#                                       reg_lambda=1, scale_pos_weight=1, base_score=0.5, missing=None)
-#
-#
-# xgboost_best_model_99th_percentile = GridSearchCV(xgboost_99th_percentile, parameters_xgboost_99th_percentile, n_jobs=1,
-#                                              cv=10, refit=True, return_train_score=True)
-#
-# xgboost_best_99th_percentile = xgboost_best_model_99th_percentile.fit(X=data_split_99th_percentile_xgboost[0],
-#                                                             y=data_split_99th_percentile_xgboost[1],
-#                                                             eval_set=[(data_split_99th_percentile_xgboost[0],
-#                                                                        data_split_99th_percentile_xgboost[1]),
-#                                                                       (data_split_99th_percentile_xgboost_test[0],
-#                                                                        data_split_99th_percentile_xgboost_test[1])],
-#                                                             eval_metric='mae', early_stopping_rounds=10)
-#
-#
-# print array_print(data_split_99th_percentile_xgboost_test[1])
-# print array_print( xgboost_best_99th_percentile.predict(data_split_99th_percentile_xgboost_test[0]))
-# print array_print(evaluator(data_split_99th_percentile_xgboost[1],
-#                             xgboost_best_99th_percentile.predict(data_split_99th_percentile_xgboost[0])))
-# print array_print(evaluator(data_split_99th_percentile_xgboost_test[1],
-#                             xgboost_best_99th_percentile.predict(data_split_99th_percentile_xgboost_test[0])))
-#
-# print (time.time()-time2)
-# # ###########################################################################
-#
-#
-#
-#
-# time1 = time.time()
-# time2 = time.time()
-# ###################################################################################
+print "\n\n\n95th_percentile "
+
+data_split_95th_percentile_svr = np.array([], dtype='float64')
+data_split_95th_percentile_svr = data_reader(csv_file=summary_data, total_row=n_rows, thousands_splitter=t_splitter,
+                                        csv_select_columns=csv_select_cols,
+                                        x_column_numbers=x_select_cols_95th_percentile_svr,
+                                        y_column_number=y_select_col_95th_percentile)
+
+data_split_95th_percentile_svr_test = np.array([], dtype='float64')
+data_split_95th_percentile_svr_test = data_reader(csv_file=summary_data_test, total_row=n_rows,
+                                             thousands_splitter=t_splitter, csv_select_columns=csv_select_cols,
+                                             x_column_numbers=x_select_cols_95th_percentile_svr,
+                                             y_column_number=y_select_col_95th_percentile)
+# additional feature 10 = Concurrency / Message size
+
+
+ ##################################################################################
+print "\n\n\nSVR Grid Search CV 95th_percentile"
+parameters_svr_95th_percentile = {'kernel': ['rbf', 'poly', 'linear'], 'C': [1E2, 1E3],
+                             'epsilon': [0.0001, 0.0005, 0.001, 0.005,  0.01, 0.05, 0.1, 0.5, 1, 5, 10]}
+
+svr_95th_percentile = SVR(coef0=0.1, tol=0.001, shrinking=True, cache_size=200, verbose=False, max_iter=-1)
+
+svr_best_model_95th_percentile = GridSearchCV(svr_95th_percentile, parameters_svr_95th_percentile, cv=10, n_jobs=1,
+                                         return_train_score=True, refit=True, scoring='neg_mean_absolute_error')
+
+svr_best_95th_percentile = svr_best_model_95th_percentile.fit(data_split_95th_percentile_svr[0], data_split_95th_percentile_svr[1])
+
+print array_print(data_split_95th_percentile_svr_test[1])
+print array_print(svr_best_model_95th_percentile.predict(data_split_95th_percentile_svr_test[0]))
+print array_print(evaluator(data_split_95th_percentile_svr[1],
+                            svr_best_95th_percentile.predict(data_split_95th_percentile_svr[0])))
+print array_print(evaluator(data_split_95th_percentile_svr_test[1],
+                            svr_best_95th_percentile.predict(data_split_95th_percentile_svr_test[0])))
+
+print 'time', time.time()-time2
+# #############################################################################
+
+
+print "\n\n\nXGBoost Grid Search CV 95th_percentile "
+
+data_split_95th_percentile_xgboost = np.array([], dtype='float64')
+data_split_95th_percentile_xgboost = data_reader(csv_file=summary_data, total_row=n_rows, thousands_splitter=t_splitter,
+                                            csv_select_columns=csv_select_cols,
+                                            x_column_numbers=x_select_cols_95th_percentile_xgboost,
+                                            y_column_number=y_select_col_95th_percentile)
+
+data_split_95th_percentile_xgboost_test = np.array([], dtype='float64')
+data_split_95th_percentile_xgboost_test = data_reader(csv_file=summary_data_test, total_row=n_rows,
+                                                 thousands_splitter=t_splitter, csv_select_columns=csv_select_cols,
+                                                 x_column_numbers=x_select_cols_95th_percentile_xgboost,
+                                                 y_column_number=y_select_col_95th_percentile)
+# additional feature 10 = Concurrency / Message size
+
+parameters_xgboost_95th_percentile = {'max_depth': [3], 'learning_rate': [0.025], 'n_estimators': [800],
+                                 'min_child_weight': [2], 'max_delta_step': [0]}
+
+xgboost_95th_percentile = xgb.XGBRegressor(silent=True, objective='reg:linear', gamma=0,
+                                      subsample=1, colsample_bytree=1, colsample_bylevel=1, reg_alpha=0,
+                                      reg_lambda=1, scale_pos_weight=1, base_score=0.5, missing=None)
+
+
+xgboost_best_model_95th_percentile = GridSearchCV(xgboost_95th_percentile, parameters_xgboost_95th_percentile, n_jobs=1,
+                                             cv=10, refit=True, return_train_score=True)
+
+xgboost_best_95th_percentile = xgboost_best_model_95th_percentile.fit(X=data_split_95th_percentile_xgboost[0],
+                                                            y=data_split_95th_percentile_xgboost[1],
+                                                            eval_set=[(data_split_95th_percentile_xgboost[0],
+                                                                       data_split_95th_percentile_xgboost[1]),
+                                                                      (data_split_95th_percentile_xgboost_test[0],
+                                                                       data_split_95th_percentile_xgboost_test[1])],
+                                                            eval_metric='mae', early_stopping_rounds=10)
+
+
+print array_print(data_split_95th_percentile_xgboost_test[1])
+print array_print( xgboost_best_95th_percentile.predict(data_split_95th_percentile_xgboost_test[0]))
+print array_print(evaluator(data_split_95th_percentile_xgboost[1],
+                            xgboost_best_95th_percentile.predict(data_split_95th_percentile_xgboost[0])))
+print array_print(evaluator(data_split_95th_percentile_xgboost_test[1],
+                            xgboost_best_95th_percentile.predict(data_split_95th_percentile_xgboost_test[0])))
+
+print (time.time()-time2)
+# ###########################################################################
+
+
+
+time1 = time.time()
+time2 = time.time()
+###################################################################################
+# 99th_percentile
+print "\n\n\n99th_percentile "
+
+data_split_99th_percentile_svr = np.array([], dtype='float64')
+data_split_99th_percentile_svr = data_reader(csv_file=summary_data, total_row=n_rows, thousands_splitter=t_splitter,
+                                        csv_select_columns=csv_select_cols,
+                                        x_column_numbers=x_select_cols_99th_percentile_svr,
+                                        y_column_number=y_select_col_99th_percentile)
+
+data_split_99th_percentile_svr_test = np.array([], dtype='float64')
+data_split_99th_percentile_svr_test = data_reader(csv_file=summary_data_test, total_row=n_rows,
+                                             thousands_splitter=t_splitter, csv_select_columns=csv_select_cols,
+                                             x_column_numbers=x_select_cols_99th_percentile_svr,
+                                             y_column_number=y_select_col_99th_percentile)
+# additional feature 10 = Concurrency / Message size
+
+
+#  #################################################################################
+print "\n\n\nSVR Grid Search CV 99th_percentile"
+parameters_svr_99th_percentile = {'kernel': ['rbf', 'poly', 'linear'], 'C': [1E2, 1E3],
+                             'epsilon': [0.0001, 0.0005, 0.001, 0.005,  0.01, 0.05, 0.1, 0.5, 1, 5, 10]}
+
+svr_99th_percentile = SVR(coef0=0.1, tol=0.001, shrinking=True, cache_size=200, verbose=False, max_iter=-1)
+
+svr_best_model_99th_percentile = GridSearchCV(svr_99th_percentile, parameters_svr_99th_percentile, cv=10, n_jobs=1,
+                                         return_train_score=True, refit=True, scoring='neg_mean_absolute_error')
+
+svr_best_99th_percentile = svr_best_model_99th_percentile.fit(data_split_99th_percentile_svr[0], data_split_99th_percentile_svr[1])
+
+print array_print(data_split_99th_percentile_svr_test[1])
+print array_print(svr_best_model_99th_percentile.predict(data_split_99th_percentile_svr_test[0]))
+print array_print(evaluator(data_split_99th_percentile_svr[1],
+                            svr_best_99th_percentile.predict(data_split_99th_percentile_svr[0])))
+print array_print(evaluator(data_split_99th_percentile_svr_test[1],
+                            svr_best_99th_percentile.predict(data_split_99th_percentile_svr_test[0])))
+
+print 'time', time.time()-time2
+# #############################################################################
+
+
+print "\n\n\nXGBoost Grid Search CV 99th_percentile "
+
+data_split_99th_percentile_xgboost = np.array([], dtype='float64')
+data_split_99th_percentile_xgboost = data_reader(csv_file=summary_data, total_row=n_rows, thousands_splitter=t_splitter,
+                                            csv_select_columns=csv_select_cols,
+                                            x_column_numbers=x_select_cols_99th_percentile_xgboost,
+                                            y_column_number=y_select_col_99th_percentile)
+
+data_split_99th_percentile_xgboost_test = np.array([], dtype='float64')
+data_split_99th_percentile_xgboost_test = data_reader(csv_file=summary_data_test, total_row=n_rows,
+                                                 thousands_splitter=t_splitter, csv_select_columns=csv_select_cols,
+                                                 x_column_numbers=x_select_cols_99th_percentile_xgboost,
+                                                 y_column_number=y_select_col_99th_percentile)
+# additional feature 10 = Concurrency / Message size
+
+parameters_xgboost_99th_percentile = {'max_depth': [4], 'learning_rate': [0.03], 'n_estimators': [1000],
+                                 'min_child_weight': [2], 'max_delta_step': [0]}
+
+xgboost_99th_percentile = xgb.XGBRegressor(silent=True, objective='reg:linear', gamma=0,
+                                      subsample=1, colsample_bytree=1, colsample_bylevel=1, reg_alpha=0,
+                                      reg_lambda=1, scale_pos_weight=1, base_score=0.5, missing=None)
+
+
+xgboost_best_model_99th_percentile = GridSearchCV(xgboost_99th_percentile, parameters_xgboost_99th_percentile, n_jobs=1,
+                                             cv=10, refit=True, return_train_score=True)
+
+xgboost_best_99th_percentile = xgboost_best_model_99th_percentile.fit(X=data_split_99th_percentile_xgboost[0],
+                                                            y=data_split_99th_percentile_xgboost[1],
+                                                            eval_set=[(data_split_99th_percentile_xgboost[0],
+                                                                       data_split_99th_percentile_xgboost[1]),
+                                                                      (data_split_99th_percentile_xgboost_test[0],
+                                                                       data_split_99th_percentile_xgboost_test[1])],
+                                                            eval_metric='mae', early_stopping_rounds=10)
+
+
+print array_print(data_split_99th_percentile_xgboost_test[1])
+print array_print( xgboost_best_99th_percentile.predict(data_split_99th_percentile_xgboost_test[0]))
+print array_print(evaluator(data_split_99th_percentile_xgboost[1],
+                            xgboost_best_99th_percentile.predict(data_split_99th_percentile_xgboost[0])))
+print array_print(evaluator(data_split_99th_percentile_xgboost_test[1],
+                            xgboost_best_99th_percentile.predict(data_split_99th_percentile_xgboost_test[0])))
+
+print (time.time()-time2)
+# ###########################################################################
+
+
+
+
+time1 = time.time()
+time2 = time.time()
+###################################################################################
 # load_average_1_minute
 print "\n\n\nload_average_1_minute "
 
@@ -606,228 +606,228 @@ print array_print(evaluator(data_split_load_average_1_minute_svr_test[1],
 
 print 'time', time.time()-time2
 # #############################################################################
-#
-#
-# print "\n\n\nXGBoost Grid Search CV load_average_1_minute "
-#
-# data_split_load_average_1_minute_xgboost = np.array([], dtype='float64')
-# data_split_load_average_1_minute_xgboost = data_reader(csv_file=summary_data, total_row=n_rows, thousands_splitter=t_splitter,
-#                                             csv_select_columns=csv_select_cols,
-#                                             x_column_numbers=x_select_cols_load_average_1_minute_xgboost,
-#                                             y_column_number=y_select_col_load_average_1_minute)
-#
-# data_split_load_average_1_minute_xgboost_test = np.array([], dtype='float64')
-# data_split_load_average_1_minute_xgboost_test = data_reader(csv_file=summary_data_test, total_row=n_rows,
-#                                                  thousands_splitter=t_splitter, csv_select_columns=csv_select_cols,
-#                                                  x_column_numbers=x_select_cols_load_average_1_minute_xgboost,
-#                                                  y_column_number=y_select_col_load_average_1_minute)
-# # additional feature 10 = Concurrency / Message size
-#
-# parameters_xgboost_load_average_1_minute = {'max_depth': [10], 'learning_rate': [0.02], 'n_estimators': [1000],
-#                                  'min_child_weight': [0], 'max_delta_step': [0]}
-#
-# xgboost_load_average_1_minute = xgb.XGBRegressor(silent=True, objective='reg:linear', gamma=0,
-#                                       subsample=1, colsample_bytree=1, colsample_bylevel=1, reg_alpha=0,
-#                                       reg_lambda=1, scale_pos_weight=1, base_score=0.5, missing=None)
-#
-#
-# xgboost_best_model_load_average_1_minute = GridSearchCV(xgboost_load_average_1_minute, parameters_xgboost_load_average_1_minute, n_jobs=1,
-#                                              cv=10, refit=True, return_train_score=True)
-#
-# xgboost_best_load_average_1_minute = xgboost_best_model_load_average_1_minute.fit(X=data_split_load_average_1_minute_xgboost[0],
-#                                                             y=data_split_load_average_1_minute_xgboost[1],
-#                                                             eval_set=[(data_split_load_average_1_minute_xgboost[0],
-#                                                                        data_split_load_average_1_minute_xgboost[1]),
-#                                                                       (data_split_load_average_1_minute_xgboost_test[0],
-#                                                                        data_split_load_average_1_minute_xgboost_test[1])],
-#                                                             eval_metric='mae', early_stopping_rounds=10)
-#
-#
-# print array_print(data_split_load_average_1_minute_xgboost_test[1])
-# print array_print( xgboost_best_load_average_1_minute.predict(data_split_load_average_1_minute_xgboost_test[0]))
-# print array_print(evaluator(data_split_load_average_1_minute_xgboost[1],
-#                             xgboost_best_load_average_1_minute.predict(data_split_load_average_1_minute_xgboost[0])))
-# print array_print(evaluator(data_split_load_average_1_minute_xgboost_test[1],
-#                             xgboost_best_load_average_1_minute.predict(data_split_load_average_1_minute_xgboost_test[0])))
-#
-# print (time.time()-time2)
-# # ###########################################################################
-#
-#
-#
-# time1 = time.time()
-# time2 = time.time()
-# ###################################################################################
-# # load_average_5_minute
-# print "\n\n\nload_average_5_minute "
-#
-# data_split_load_average_5_minute_svr = np.array([], dtype='float64')
-# data_split_load_average_5_minute_svr = data_reader(csv_file=summary_data, total_row=n_rows, thousands_splitter=t_splitter,
-#                                         csv_select_columns=csv_select_cols,
-#                                         x_column_numbers=x_select_cols_load_average_5_minute_svr,
-#                                         y_column_number=y_select_col_load_average_5_minute)
-#
-# data_split_load_average_5_minute_svr_test = np.array([], dtype='float64')
-# data_split_load_average_5_minute_svr_test = data_reader(csv_file=summary_data_test, total_row=n_rows,
-#                                              thousands_splitter=t_splitter, csv_select_columns=csv_select_cols,
-#                                              x_column_numbers=x_select_cols_load_average_5_minute_svr,
-#                                              y_column_number=y_select_col_load_average_5_minute)
-# # additional feature 10 = Concurrency / Message size
-#
-#
-#  ##################################################################################
-# print "\n\n\nSVR Grid Search CV load_average_5_minute"
-# parameters_svr_load_average_5_minute = {'kernel': ['rbf', 'poly', 'linear'], 'C': [1E2, 1E3],
-#                              'epsilon': [0.0001, 0.0005, 0.001, 0.005,  0.01, 0.05, 0.1, 0.5, 1, 5, 10]}
-#
-# svr_load_average_5_minute = SVR(coef0=0.1, tol=0.001, shrinking=True, cache_size=200, verbose=False, max_iter=-1)
-#
-# svr_best_model_load_average_5_minute = GridSearchCV(svr_load_average_5_minute, parameters_svr_load_average_5_minute, cv=10, n_jobs=1,
-#                                          return_train_score=True, refit=True, scoring='neg_mean_absolute_error')
-#
-# svr_best_load_average_5_minute = svr_best_model_load_average_5_minute.fit(data_split_load_average_5_minute_svr[0], data_split_load_average_5_minute_svr[1])
-#
-# print array_print(data_split_load_average_5_minute_svr_test[1])
-# print array_print(svr_best_model_load_average_5_minute.predict(data_split_load_average_5_minute_svr_test[0]))
-# print array_print(evaluator(data_split_load_average_5_minute_svr[1],
-#                             svr_best_load_average_5_minute.predict(data_split_load_average_5_minute_svr[0])))
-# print array_print(evaluator(data_split_load_average_5_minute_svr_test[1],
-#                             svr_best_load_average_5_minute.predict(data_split_load_average_5_minute_svr_test[0])))
-#
-# print 'time', time.time()-time2
-# # #############################################################################
-#
-#
-# print "\n\n\nXGBoost Grid Search CV load_average_5_minute "
-#
-# data_split_load_average_5_minute_xgboost = np.array([], dtype='float64')
-# data_split_load_average_5_minute_xgboost = data_reader(csv_file=summary_data, total_row=n_rows, thousands_splitter=t_splitter,
-#                                             csv_select_columns=csv_select_cols,
-#                                             x_column_numbers=x_select_cols_load_average_5_minute_xgboost,
-#                                             y_column_number=y_select_col_load_average_5_minute)
-#
-# data_split_load_average_5_minute_xgboost_test = np.array([], dtype='float64')
-# data_split_load_average_5_minute_xgboost_test = data_reader(csv_file=summary_data_test, total_row=n_rows,
-#                                                  thousands_splitter=t_splitter, csv_select_columns=csv_select_cols,
-#                                                  x_column_numbers=x_select_cols_load_average_5_minute_xgboost,
-#                                                  y_column_number=y_select_col_load_average_5_minute)
-# # additional feature 10 = Concurrency / Message size
-#
-# parameters_xgboost_load_average_5_minute = {'max_depth': [10], 'learning_rate': [0.01], 'n_estimators': [1000],
-#                                  'min_child_weight': [2], 'max_delta_step': [0]}
-#
-# xgboost_load_average_5_minute = xgb.XGBRegressor(silent=True, objective='reg:linear', gamma=0,
-#                                       subsample=1, colsample_bytree=1, colsample_bylevel=1, reg_alpha=0,
-#                                       reg_lambda=1, scale_pos_weight=1, base_score=0.5, missing=None)
-#
-#
-# xgboost_best_model_load_average_5_minute = GridSearchCV(xgboost_load_average_5_minute, parameters_xgboost_load_average_5_minute, n_jobs=1,
-#                                              cv=10, refit=True, return_train_score=True)
-#
-# xgboost_best_load_average_5_minute = xgboost_best_model_load_average_5_minute.fit(X=data_split_load_average_5_minute_xgboost[0],
-#                                                             y=data_split_load_average_5_minute_xgboost[1],
-#                                                             eval_set=[(data_split_load_average_5_minute_xgboost[0],
-#                                                                        data_split_load_average_5_minute_xgboost[1]),
-#                                                                       (data_split_load_average_5_minute_xgboost_test[0],
-#                                                                        data_split_load_average_5_minute_xgboost_test[1])],
-#                                                             eval_metric='mae', early_stopping_rounds=10)
-#
-#
-# print array_print(data_split_load_average_5_minute_xgboost_test[1])
-# print array_print( xgboost_best_load_average_5_minute.predict(data_split_load_average_5_minute_xgboost_test[0]))
-# print array_print(evaluator(data_split_load_average_5_minute_xgboost[1],
-#                             xgboost_best_load_average_5_minute.predict(data_split_load_average_5_minute_xgboost[0])))
-# print array_print(evaluator(data_split_load_average_5_minute_xgboost_test[1],
-#                             xgboost_best_load_average_5_minute.predict(data_split_load_average_5_minute_xgboost_test[0])))
-#
-# print (time.time()-time2)
-# # ###########################################################################
-#
-#
-#
-# time1 = time.time()
-# time2 = time.time()
-# ###################################################################################
-# # load_average_15_minute
-# print "\n\n\nload_average_15_minute "
-#
-# data_split_load_average_15_minute_svr = np.array([], dtype='float64')
-# data_split_load_average_15_minute_svr = data_reader(csv_file=summary_data, total_row=n_rows, thousands_splitter=t_splitter,
-#                                         csv_select_columns=csv_select_cols,
-#                                         x_column_numbers=x_select_cols_load_average_15_minute_svr,
-#                                         y_column_number=y_select_col_load_average_15_minute)
-#
-# data_split_load_average_15_minute_svr_test = np.array([], dtype='float64')
-# data_split_load_average_15_minute_svr_test = data_reader(csv_file=summary_data_test, total_row=n_rows,
-#                                              thousands_splitter=t_splitter, csv_select_columns=csv_select_cols,
-#                                              x_column_numbers=x_select_cols_load_average_15_minute_svr,
-#                                              y_column_number=y_select_col_load_average_15_minute)
-#
-#
-# # ##################################################################################
-# print "\n\n\nSVR Grid Search CV load_average_15_minute"
-# parameters_svr_load_average_15_minute = {'kernel': ['rbf', 'poly', 'linear'], 'C': [1E2, 1E3],
-#                              'epsilon': [0.0001, 0.0005, 0.001, 0.005,  0.01, 0.05, 0.1, 0.5, 1, 5, 10]}
-#
-# svr_load_average_15_minute = SVR(coef0=0.1, tol=0.001, shrinking=True, cache_size=200, verbose=False, max_iter=-1)
-#
-# svr_best_model_load_average_15_minute = GridSearchCV(svr_load_average_15_minute, parameters_svr_load_average_15_minute, cv=10, n_jobs=1,
-#                                          return_train_score=True, refit=True, scoring='neg_mean_absolute_error')
-#
-# svr_best_load_average_15_minute = svr_best_model_load_average_15_minute.fit(data_split_load_average_15_minute_svr[0], data_split_load_average_15_minute_svr[1])
-#
-# print array_print(data_split_load_average_15_minute_svr_test[1])
-# print array_print(svr_best_model_load_average_15_minute.predict(data_split_load_average_15_minute_svr_test[0]))
-# print array_print(evaluator(data_split_load_average_15_minute_svr[1],
-#                             svr_best_load_average_15_minute.predict(data_split_load_average_15_minute_svr[0])))
-# print array_print(evaluator(data_split_load_average_15_minute_svr_test[1],
-#                             svr_best_load_average_15_minute.predict(data_split_load_average_15_minute_svr_test[0])))
-#
-# print 'time', time.time()-time2
-# # #############################################################################
-#
-#
-# print "\n\n\nXGBoost Grid Search CV load_average_15_minute "
-#
-# data_split_load_average_15_minute_xgboost = np.array([], dtype='float64')
-# data_split_load_average_15_minute_xgboost = data_reader(csv_file=summary_data, total_row=n_rows, thousands_splitter=t_splitter,
-#                                             csv_select_columns=csv_select_cols,
-#                                             x_column_numbers=x_select_cols_load_average_15_minute_xgboost,
-#                                             y_column_number=y_select_col_load_average_15_minute)
-#
-# data_split_load_average_15_minute_xgboost_test = np.array([], dtype='float64')
-# data_split_load_average_15_minute_xgboost_test = data_reader(csv_file=summary_data_test, total_row=n_rows,
-#                                                  thousands_splitter=t_splitter, csv_select_columns=csv_select_cols,
-#                                                  x_column_numbers=x_select_cols_load_average_15_minute_xgboost,
-#                                                  y_column_number=y_select_col_load_average_15_minute)
-# # additional feature 10 = Concurrency / Message size
-#
-# parameters_xgboost_load_average_15_minute = {'max_depth': [3], 'learning_rate': [0.1], 'n_estimators': [500],
-#                                  'min_child_weight': [2], 'max_delta_step': [0]}
-#
-# xgboost_load_average_15_minute = xgb.XGBRegressor(silent=True, objective='reg:linear', gamma=0,
-#                                       subsample=1, colsample_bytree=1, colsample_bylevel=1, reg_alpha=0,
-#                                       reg_lambda=1, scale_pos_weight=1, base_score=0.5, missing=None)
-#
-#
-# xgboost_best_model_load_average_15_minute = GridSearchCV(xgboost_load_average_15_minute, parameters_xgboost_load_average_15_minute, n_jobs=1,
-#                                              cv=10, refit=True, return_train_score=True)
-#
-# xgboost_best_load_average_15_minute = xgboost_best_model_load_average_15_minute.fit(X=data_split_load_average_15_minute_xgboost[0],
-#                                                             y=data_split_load_average_15_minute_xgboost[1],
-#                                                             eval_set=[(data_split_load_average_15_minute_xgboost[0],
-#                                                                        data_split_load_average_15_minute_xgboost[1]),
-#                                                                       (data_split_load_average_15_minute_xgboost_test[0],
-#                                                                        data_split_load_average_15_minute_xgboost_test[1])],
-#                                                             eval_metric='mae', early_stopping_rounds=10)
-#
-#
-# print array_print(data_split_load_average_15_minute_xgboost_test[1])
-# print array_print( xgboost_best_load_average_15_minute.predict(data_split_load_average_15_minute_xgboost_test[0]))
-# print array_print(evaluator(data_split_load_average_15_minute_xgboost[1],
-#                             xgboost_best_load_average_15_minute.predict(data_split_load_average_15_minute_xgboost[0])))
-# print array_print(evaluator(data_split_load_average_15_minute_xgboost_test[1],
-#                             xgboost_best_load_average_15_minute.predict(data_split_load_average_15_minute_xgboost_test[0])))
-#
-# print (time.time()-time2)
-# # ###########################################################################
+
+
+print "\n\n\nXGBoost Grid Search CV load_average_1_minute "
+
+data_split_load_average_1_minute_xgboost = np.array([], dtype='float64')
+data_split_load_average_1_minute_xgboost = data_reader(csv_file=summary_data, total_row=n_rows, thousands_splitter=t_splitter,
+                                            csv_select_columns=csv_select_cols,
+                                            x_column_numbers=x_select_cols_load_average_1_minute_xgboost,
+                                            y_column_number=y_select_col_load_average_1_minute)
+
+data_split_load_average_1_minute_xgboost_test = np.array([], dtype='float64')
+data_split_load_average_1_minute_xgboost_test = data_reader(csv_file=summary_data_test, total_row=n_rows,
+                                                 thousands_splitter=t_splitter, csv_select_columns=csv_select_cols,
+                                                 x_column_numbers=x_select_cols_load_average_1_minute_xgboost,
+                                                 y_column_number=y_select_col_load_average_1_minute)
+# additional feature 10 = Concurrency / Message size
+
+parameters_xgboost_load_average_1_minute = {'max_depth': [10], 'learning_rate': [0.02], 'n_estimators': [1000],
+                                 'min_child_weight': [0], 'max_delta_step': [0]}
+
+xgboost_load_average_1_minute = xgb.XGBRegressor(silent=True, objective='reg:linear', gamma=0,
+                                      subsample=1, colsample_bytree=1, colsample_bylevel=1, reg_alpha=0,
+                                      reg_lambda=1, scale_pos_weight=1, base_score=0.5, missing=None)
+
+
+xgboost_best_model_load_average_1_minute = GridSearchCV(xgboost_load_average_1_minute, parameters_xgboost_load_average_1_minute, n_jobs=1,
+                                             cv=10, refit=True, return_train_score=True)
+
+xgboost_best_load_average_1_minute = xgboost_best_model_load_average_1_minute.fit(X=data_split_load_average_1_minute_xgboost[0],
+                                                            y=data_split_load_average_1_minute_xgboost[1],
+                                                            eval_set=[(data_split_load_average_1_minute_xgboost[0],
+                                                                       data_split_load_average_1_minute_xgboost[1]),
+                                                                      (data_split_load_average_1_minute_xgboost_test[0],
+                                                                       data_split_load_average_1_minute_xgboost_test[1])],
+                                                            eval_metric='mae', early_stopping_rounds=10)
+
+
+print array_print(data_split_load_average_1_minute_xgboost_test[1])
+print array_print( xgboost_best_load_average_1_minute.predict(data_split_load_average_1_minute_xgboost_test[0]))
+print array_print(evaluator(data_split_load_average_1_minute_xgboost[1],
+                            xgboost_best_load_average_1_minute.predict(data_split_load_average_1_minute_xgboost[0])))
+print array_print(evaluator(data_split_load_average_1_minute_xgboost_test[1],
+                            xgboost_best_load_average_1_minute.predict(data_split_load_average_1_minute_xgboost_test[0])))
+
+print (time.time()-time2)
+# ###########################################################################
+
+
+
+time1 = time.time()
+time2 = time.time()
+###################################################################################
+# load_average_5_minute
+print "\n\n\nload_average_5_minute "
+
+data_split_load_average_5_minute_svr = np.array([], dtype='float64')
+data_split_load_average_5_minute_svr = data_reader(csv_file=summary_data, total_row=n_rows, thousands_splitter=t_splitter,
+                                        csv_select_columns=csv_select_cols,
+                                        x_column_numbers=x_select_cols_load_average_5_minute_svr,
+                                        y_column_number=y_select_col_load_average_5_minute)
+
+data_split_load_average_5_minute_svr_test = np.array([], dtype='float64')
+data_split_load_average_5_minute_svr_test = data_reader(csv_file=summary_data_test, total_row=n_rows,
+                                             thousands_splitter=t_splitter, csv_select_columns=csv_select_cols,
+                                             x_column_numbers=x_select_cols_load_average_5_minute_svr,
+                                             y_column_number=y_select_col_load_average_5_minute)
+# additional feature 10 = Concurrency / Message size
+
+
+ ##################################################################################
+print "\n\n\nSVR Grid Search CV load_average_5_minute"
+parameters_svr_load_average_5_minute = {'kernel': ['rbf', 'poly', 'linear'], 'C': [1E2, 1E3],
+                             'epsilon': [0.0001, 0.0005, 0.001, 0.005,  0.01, 0.05, 0.1, 0.5, 1, 5, 10]}
+
+svr_load_average_5_minute = SVR(coef0=0.1, tol=0.001, shrinking=True, cache_size=200, verbose=False, max_iter=-1)
+
+svr_best_model_load_average_5_minute = GridSearchCV(svr_load_average_5_minute, parameters_svr_load_average_5_minute, cv=10, n_jobs=1,
+                                         return_train_score=True, refit=True, scoring='neg_mean_absolute_error')
+
+svr_best_load_average_5_minute = svr_best_model_load_average_5_minute.fit(data_split_load_average_5_minute_svr[0], data_split_load_average_5_minute_svr[1])
+
+print array_print(data_split_load_average_5_minute_svr_test[1])
+print array_print(svr_best_model_load_average_5_minute.predict(data_split_load_average_5_minute_svr_test[0]))
+print array_print(evaluator(data_split_load_average_5_minute_svr[1],
+                            svr_best_load_average_5_minute.predict(data_split_load_average_5_minute_svr[0])))
+print array_print(evaluator(data_split_load_average_5_minute_svr_test[1],
+                            svr_best_load_average_5_minute.predict(data_split_load_average_5_minute_svr_test[0])))
+
+print 'time', time.time()-time2
+# #############################################################################
+
+
+print "\n\n\nXGBoost Grid Search CV load_average_5_minute "
+
+data_split_load_average_5_minute_xgboost = np.array([], dtype='float64')
+data_split_load_average_5_minute_xgboost = data_reader(csv_file=summary_data, total_row=n_rows, thousands_splitter=t_splitter,
+                                            csv_select_columns=csv_select_cols,
+                                            x_column_numbers=x_select_cols_load_average_5_minute_xgboost,
+                                            y_column_number=y_select_col_load_average_5_minute)
+
+data_split_load_average_5_minute_xgboost_test = np.array([], dtype='float64')
+data_split_load_average_5_minute_xgboost_test = data_reader(csv_file=summary_data_test, total_row=n_rows,
+                                                 thousands_splitter=t_splitter, csv_select_columns=csv_select_cols,
+                                                 x_column_numbers=x_select_cols_load_average_5_minute_xgboost,
+                                                 y_column_number=y_select_col_load_average_5_minute)
+# additional feature 10 = Concurrency / Message size
+
+parameters_xgboost_load_average_5_minute = {'max_depth': [10], 'learning_rate': [0.01], 'n_estimators': [1000],
+                                 'min_child_weight': [2], 'max_delta_step': [0]}
+
+xgboost_load_average_5_minute = xgb.XGBRegressor(silent=True, objective='reg:linear', gamma=0,
+                                      subsample=1, colsample_bytree=1, colsample_bylevel=1, reg_alpha=0,
+                                      reg_lambda=1, scale_pos_weight=1, base_score=0.5, missing=None)
+
+
+xgboost_best_model_load_average_5_minute = GridSearchCV(xgboost_load_average_5_minute, parameters_xgboost_load_average_5_minute, n_jobs=1,
+                                             cv=10, refit=True, return_train_score=True)
+
+xgboost_best_load_average_5_minute = xgboost_best_model_load_average_5_minute.fit(X=data_split_load_average_5_minute_xgboost[0],
+                                                            y=data_split_load_average_5_minute_xgboost[1],
+                                                            eval_set=[(data_split_load_average_5_minute_xgboost[0],
+                                                                       data_split_load_average_5_minute_xgboost[1]),
+                                                                      (data_split_load_average_5_minute_xgboost_test[0],
+                                                                       data_split_load_average_5_minute_xgboost_test[1])],
+                                                            eval_metric='mae', early_stopping_rounds=10)
+
+
+print array_print(data_split_load_average_5_minute_xgboost_test[1])
+print array_print( xgboost_best_load_average_5_minute.predict(data_split_load_average_5_minute_xgboost_test[0]))
+print array_print(evaluator(data_split_load_average_5_minute_xgboost[1],
+                            xgboost_best_load_average_5_minute.predict(data_split_load_average_5_minute_xgboost[0])))
+print array_print(evaluator(data_split_load_average_5_minute_xgboost_test[1],
+                            xgboost_best_load_average_5_minute.predict(data_split_load_average_5_minute_xgboost_test[0])))
+
+print (time.time()-time2)
+# ###########################################################################
+
+
+
+time1 = time.time()
+time2 = time.time()
+###################################################################################
+# load_average_15_minute
+print "\n\n\nload_average_15_minute "
+
+data_split_load_average_15_minute_svr = np.array([], dtype='float64')
+data_split_load_average_15_minute_svr = data_reader(csv_file=summary_data, total_row=n_rows, thousands_splitter=t_splitter,
+                                        csv_select_columns=csv_select_cols,
+                                        x_column_numbers=x_select_cols_load_average_15_minute_svr,
+                                        y_column_number=y_select_col_load_average_15_minute)
+
+data_split_load_average_15_minute_svr_test = np.array([], dtype='float64')
+data_split_load_average_15_minute_svr_test = data_reader(csv_file=summary_data_test, total_row=n_rows,
+                                             thousands_splitter=t_splitter, csv_select_columns=csv_select_cols,
+                                             x_column_numbers=x_select_cols_load_average_15_minute_svr,
+                                             y_column_number=y_select_col_load_average_15_minute)
+
+
+# ##################################################################################
+print "\n\n\nSVR Grid Search CV load_average_15_minute"
+parameters_svr_load_average_15_minute = {'kernel': ['rbf', 'poly', 'linear'], 'C': [1E2, 1E3],
+                             'epsilon': [0.0001, 0.0005, 0.001, 0.005,  0.01, 0.05, 0.1, 0.5, 1, 5, 10]}
+
+svr_load_average_15_minute = SVR(coef0=0.1, tol=0.001, shrinking=True, cache_size=200, verbose=False, max_iter=-1)
+
+svr_best_model_load_average_15_minute = GridSearchCV(svr_load_average_15_minute, parameters_svr_load_average_15_minute, cv=10, n_jobs=1,
+                                         return_train_score=True, refit=True, scoring='neg_mean_absolute_error')
+
+svr_best_load_average_15_minute = svr_best_model_load_average_15_minute.fit(data_split_load_average_15_minute_svr[0], data_split_load_average_15_minute_svr[1])
+
+print array_print(data_split_load_average_15_minute_svr_test[1])
+print array_print(svr_best_model_load_average_15_minute.predict(data_split_load_average_15_minute_svr_test[0]))
+print array_print(evaluator(data_split_load_average_15_minute_svr[1],
+                            svr_best_load_average_15_minute.predict(data_split_load_average_15_minute_svr[0])))
+print array_print(evaluator(data_split_load_average_15_minute_svr_test[1],
+                            svr_best_load_average_15_minute.predict(data_split_load_average_15_minute_svr_test[0])))
+
+print 'time', time.time()-time2
+# #############################################################################
+
+
+print "\n\n\nXGBoost Grid Search CV load_average_15_minute "
+
+data_split_load_average_15_minute_xgboost = np.array([], dtype='float64')
+data_split_load_average_15_minute_xgboost = data_reader(csv_file=summary_data, total_row=n_rows, thousands_splitter=t_splitter,
+                                            csv_select_columns=csv_select_cols,
+                                            x_column_numbers=x_select_cols_load_average_15_minute_xgboost,
+                                            y_column_number=y_select_col_load_average_15_minute)
+
+data_split_load_average_15_minute_xgboost_test = np.array([], dtype='float64')
+data_split_load_average_15_minute_xgboost_test = data_reader(csv_file=summary_data_test, total_row=n_rows,
+                                                 thousands_splitter=t_splitter, csv_select_columns=csv_select_cols,
+                                                 x_column_numbers=x_select_cols_load_average_15_minute_xgboost,
+                                                 y_column_number=y_select_col_load_average_15_minute)
+# additional feature 10 = Concurrency / Message size
+
+parameters_xgboost_load_average_15_minute = {'max_depth': [3], 'learning_rate': [0.1], 'n_estimators': [500],
+                                 'min_child_weight': [2], 'max_delta_step': [0]}
+
+xgboost_load_average_15_minute = xgb.XGBRegressor(silent=True, objective='reg:linear', gamma=0,
+                                      subsample=1, colsample_bytree=1, colsample_bylevel=1, reg_alpha=0,
+                                      reg_lambda=1, scale_pos_weight=1, base_score=0.5, missing=None)
+
+
+xgboost_best_model_load_average_15_minute = GridSearchCV(xgboost_load_average_15_minute, parameters_xgboost_load_average_15_minute, n_jobs=1,
+                                             cv=10, refit=True, return_train_score=True)
+
+xgboost_best_load_average_15_minute = xgboost_best_model_load_average_15_minute.fit(X=data_split_load_average_15_minute_xgboost[0],
+                                                            y=data_split_load_average_15_minute_xgboost[1],
+                                                            eval_set=[(data_split_load_average_15_minute_xgboost[0],
+                                                                       data_split_load_average_15_minute_xgboost[1]),
+                                                                      (data_split_load_average_15_minute_xgboost_test[0],
+                                                                       data_split_load_average_15_minute_xgboost_test[1])],
+                                                            eval_metric='mae', early_stopping_rounds=10)
+
+
+print array_print(data_split_load_average_15_minute_xgboost_test[1])
+print array_print( xgboost_best_load_average_15_minute.predict(data_split_load_average_15_minute_xgboost_test[0]))
+print array_print(evaluator(data_split_load_average_15_minute_xgboost[1],
+                            xgboost_best_load_average_15_minute.predict(data_split_load_average_15_minute_xgboost[0])))
+print array_print(evaluator(data_split_load_average_15_minute_xgboost_test[1],
+                            xgboost_best_load_average_15_minute.predict(data_split_load_average_15_minute_xgboost_test[0])))
+
+print (time.time()-time2)
+# ###########################################################################

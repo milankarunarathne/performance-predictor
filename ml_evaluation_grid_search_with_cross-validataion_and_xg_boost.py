@@ -10,20 +10,24 @@ from sklearn.model_selection import GridSearchCV
 
 summary_data = 'resources/wso2apimanagerperformanceresults.csv'
 t_splitter = ","
-csv_select_cols = [0, 1, 2, 3, 7, 10, 11, 12, 13]
+
+csv_select_cols = [0, 1, 2, 3, 7, 10, 11, 12, 13, 36, 37, 38]
 x_select_cols = [0, 1, 2, 3]  # select columns to x (features)
+y_select_col_latency = 4
 y_select_col_90th_percentile = 5
 y_select_col_95th_percentile = 6
 y_select_col_99th_percentile = 7
 y_select_col_throughput = 8
-y_select_col_latency = 4
+y_select_col_load_average_1_minute = 9
+y_select_col_load_average_5_minute = 10
+y_select_col_load_average_15_minute = 11
 t_size = 0.30  # percentage for testing (test size)
 n_rows = 117   # total rows
 r_seed = 98 # seed of random (random seed)
 kernel_grid = ['rbf', 'poly', 'linear']
 c_grid = [1E2, 1E3, 1E4, 1E5, 1E6]
-epsilion_grid = [0.0001, 0.0005, 0.001, 0.005, 0.1, 0.5, 1, 5]
-target = y_select_col_99th_percentile  # change the target as y_select_col_throughput,
+epsilion_grid = [0.0001, 0.0005, 0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1, 5]
+target = y_select_col_90th_percentile  # change the target as y_select_col_throughput,
 # y_select_col_latency,y_select_col_90th_percentile,
 # y_select_col_95th_percentile,y_select_col_99th_percentile
 

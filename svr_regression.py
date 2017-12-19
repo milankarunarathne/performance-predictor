@@ -11,10 +11,10 @@ y_select_column_throughput = 5
 y_select_column_latency = 4
 test_size = 0.33  # percentage for testing
 n_rows = 117   # total rows
-row_start = 15  # testing rows at start
+row_start = 25  # testing rows at start
 
 # read the file
-datasetno = pd.read_csv(summary_data, thousands=",", usecols=[0, 1, 2, 3, 7, 13], nrows=n_rows)
+datasetno = pd.read_csv(summary_data, thousands=",", usecols=[0, 1, 2, 3, 7, 13],)
 #  replace Echo API and Mediation API with 1 and 2
 datapd = pd.DataFrame.replace(datasetno, to_replace=['Echo API', 'Mediation API'], value=[1, 2])
 data = np.array(datapd, copy=True, )
@@ -26,11 +26,11 @@ def svr_regression_throughput(dataset, r):
     # This may do nothing, but it usually speeds up processing and can also help with accuracy.
     # Because this range is so popularly used
     y = dataset_row_n[:, y_select_column_throughput]
-    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=test_size, random_state=5)
-    svr_rbf = SVR(kernel='rbf', C=1e3, gamma=0.1)
+    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=test_size, random_state=42)
+    svr_rbf = SVR(kernel='rbf', C=1e5, gamma=0.1, epsilon=0.01)
     svr_rbf.fit(x_train, y_train)
-    confidence_throughput = svr_rbf.score(x_test, y_test)
-    return confidence_throughput
+    confidence_throughput_score = svr_rbf.score(x_test, y_test)
+    return confidence_throughput_score
 # #############################################################################
 
 
@@ -40,8 +40,9 @@ def svr_regression_latency(dataset, r):
     # This may do nothing, but it usually speeds up processing and can also help with accuracy.
     # Because this range is so popularly used
     y = dataset_row_n[:, y_select_column_latency]
-    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=test_size, random_state=10)
-    svr_rbf = SVR(kernel='rbf', C=1e3, gamma=0.1)
+    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=test_size, random_state=42)
+    # print (y_train)
+    svr_rbf = SVR(kernel='rbf', C=1e5, gamma=0.1, epsilon=0.01)
     svr_rbf.fit(x_train, y_train)
     confidence_latency = svr_rbf.score(x_test, y_test)
     return confidence_latency
@@ -61,17 +62,19 @@ for i in range(row_start, n_rows):
 ###########################################################################
 
 
+
 lw = 2
-plt.plot(confidence_results_throughput, color='navy', lw=lw, label='throughput')
+plt.plot(confidence_results_throughput, color='navy', lw=lw, label='Thr')
 plt.xlim(row_start, n_rows)
-plt.xlabel('total rows')
-plt.ylabel('success rate')
+plt.title('SVR_RBF')
+# plt.xlabel('total rows')
+plt.ylabel('success score (1 is best)')
 # plt.legend()
 #  plt.show()
 
 lw = 2
-plt.plot(confidence_results_latency, color='red', lw=lw, label='latency')
+plt.plot(confidence_results_latency, color='red', lw=lw, label='Lat')
 plt.xlim(row_start, n_rows)
-plt.xlabel('total rows')
+plt.xlabel('number of rows (use ML by increasing volume of data)')
 plt.legend()
 plt.show()
