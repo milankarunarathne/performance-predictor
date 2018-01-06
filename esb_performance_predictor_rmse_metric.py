@@ -16,8 +16,8 @@ from sklearn.metrics import make_scorer, mean_absolute_error
 import time
 
 
-summary_data = 'resources/esb/train/esb_5.0.0_performancetest_train.csv'
-summary_data_test = 'resources/esb/test/esb_5.0.0_performancetest_test.csv'
+summary_data = 'resources/esbs/train.csv'
+summary_data_test = 'resources/esbs/test.csv'
 t_splitter = ","
 
 csv_select_cols = [0, 1, 2, 3, 4, 5, 6, 10, 11, 12, 13, 14, 15, 16]
@@ -40,6 +40,13 @@ x_select_cols_99th_percentile_xgboost = [0, 1, 2, 3]  # additional feature is no
 # x_select_cols_load_average_5_minute_xgboost = [0, 1, 2, 3] # additional feature is
 # x_select_cols_load_average_15_minute_svr = [0, 1, 2, 3] # additional feature is
 # x_select_cols_load_average_15_minute_xgboost = [0, 1, 2, 3] # additional feature is
+values_throughput = [0, 1, 2, 0, 3, 2, 1, 4, 6, 5] # [0, 1, 2, 0, 1, 2, 0, 6, 4, 5]
+values_latency = [0, 1, 2, 0, 3, 2, 1, 4, 6, 5] # [0, 1, 2, 0, 3, 2, 1, 4, 6, 5]
+# 'DirectProxy', 'CBRProxy','CBRSOAPHeaderProxy', 'CBRTransportHeaderProxy', 'SecureProxy', 'XSLTEnhancedProxy', 'XSLTProxy'
+values_90th = [0, 1, 2, 0, 3, 2, 1, 4, 6, 5] # [0, 1, 2, 0, 1, 2, 3, 4, 6, 5]
+values_95th = [0, 1, 2, 0, 3, 2, 1, 4, 6, 5] # [0, 1, 2, 0, 1, 2, 3, 4, 6, 5]
+values_99th = [0, 1, 2, 0, 3, 2, 1, 4, 6, 5]
+
 y_select_col_latency = 7
 y_select_col_90th_percentile = 10
 y_select_col_95th_percentile = 11
@@ -58,7 +65,7 @@ r_seed = 37  # seed of random (random seed)
 gamma_default = 'auto'
 
 
-def data_reader(csv_file, total_row, thousands_splitter, csv_select_columns, x_column_numbers, y_column_number):
+def data_reader(csv_file, total_row, thousands_splitter, csv_select_columns, x_column_numbers, y_column_number, values):
     # time5 = time.time()
     # read the file
     data_file = pd.read_csv(csv_file, thousands=thousands_splitter, usecols=csv_select_columns,)
@@ -66,7 +73,7 @@ def data_reader(csv_file, total_row, thousands_splitter, csv_select_columns, x_c
     datapd = pd.DataFrame.replace(data_file, to_replace=['small', 'medium', 'large', 'DirectProxy', 'CBRProxy',
                                                          'CBRSOAPHeaderProxy', 'CBRTransportHeaderProxy', 'SecureProxy',
                                                          'XSLTEnhancedProxy', 'XSLTProxy'],
-                                  value=[1, 2, 3, 1, 2, 3, 4, 5, 6, 7])
+                                  value=values)
     data = np.array(datapd, copy=True, )
     dataset_row_n = data[0:total_row, :]  # select specific number of rows
     x = preprocessing.scale(dataset_row_n[:, x_column_numbers])  # machine learning to be in a range of -1 to 1.
@@ -117,23 +124,29 @@ def array_print(array_get):
 
 time1 = time.time()
 time2 = time.time()
-# ###################################################################################
+##################################################################################
 print "\n\n\nThroughput "
 
 data_split_throughput_svr = np.array([], dtype='float64')
-data_split_throughput_svr = data_reader(csv_file=summary_data, thousands_splitter=t_splitter, total_row=n_rows, csv_select_columns=csv_select_cols, x_column_numbers=x_select_cols_throughput_svr, y_column_number=y_select_col_throughput)
+data_split_throughput_svr = data_reader(csv_file=summary_data, thousands_splitter=t_splitter, total_row=n_rows,
+                                        csv_select_columns=csv_select_cols,
+                                        x_column_numbers=x_select_cols_throughput_svr,
+                                        y_column_number=y_select_col_throughput, values=values_throughput)
 
 data_split_throughput_svr_test = np.array([], dtype='float64')
-data_split_throughput_svr_test = data_reader(csv_file=summary_data_test, total_row=n_rows, thousands_splitter=t_splitter, csv_select_columns=csv_select_cols, x_column_numbers=x_select_cols_throughput_svr, y_column_number=y_select_col_throughput)
+data_split_throughput_svr_test = data_reader(csv_file=summary_data_test, total_row=n_rows,
+                                             thousands_splitter=t_splitter, csv_select_columns=csv_select_cols,
+                                             x_column_numbers=x_select_cols_throughput_svr,
+                                             y_column_number=y_select_col_throughput, values=values_throughput)
 
-################################################################################
+###########################################################################
 
 print "\n\n\nSVR Grid Search CV Throughput"
-parameters_svr_throughput = {'kernel': ['rbf', 'poly', 'linear'], 'C': [1E7], 'epsilon': [0.0001, 0.0005, 0.001, 0.005, 0.01, 0.05, 0.1, 0.5]}
+parameters_svr_throughput = {'kernel': ['rbf'], 'C': [1E5], 'epsilon': [0.0001, 0.001, 0.005, 0.01, 0.5, 0.1, 1, 5]}
 
 svr_throughput = SVR(coef0=0.1, tol=0.001, shrinking=True, cache_size=200, verbose=False, max_iter=-1)
 
-svr_best_model_throughput = GridSearchCV(svr_throughput, parameters_svr_throughput, cv=10, n_jobs=4,
+svr_best_model_throughput = GridSearchCV(svr_throughput, parameters_svr_throughput, cv=10, n_jobs=1,
                                          return_train_score=True, refit=True, scoring='neg_mean_squared_error')
 
 svr_best_throughput = svr_best_model_throughput.fit(data_split_throughput_svr[0], data_split_throughput_svr[1])
@@ -156,17 +169,19 @@ data_split_throughput_xgboost = np.array([], dtype='float64')
 data_split_throughput_xgboost = data_reader(csv_file=summary_data, total_row=n_rows, thousands_splitter=t_splitter,
                                             csv_select_columns=csv_select_cols,
                                             x_column_numbers=x_select_cols_throughput_xgboost,
-                                            y_column_number=y_select_col_throughput)
+                                            y_column_number=y_select_col_throughput, values=values_throughput)
 
 data_split_throughput_xgboost_test = np.array([], dtype='float64')
 data_split_throughput_xgboost_test = data_reader(csv_file=summary_data_test, total_row=n_rows,
                                                  thousands_splitter=t_splitter, csv_select_columns=csv_select_cols,
                                                  x_column_numbers=x_select_cols_throughput_xgboost,
-                                                 y_column_number=y_select_col_throughput)
+                                                 y_column_number=y_select_col_throughput, values=values_throughput)
 
-parameters_xgboost_throughput = {'max_depth': [6,7,8,9], 'learning_rate': [0.06], 'n_estimators': [50, 100, 200, 500], 'min_child_weight': [1,2,3,4], 'max_delta_step': [0]}
+parameters_xgboost_throughput = {'max_depth': [12], 'learning_rate': [0.028], 'n_estimators': [600], 'min_child_weight': [2], 'max_delta_step': [0]}
 
-xgboost_throughput = xgb.XGBRegressor(silent=True, objective='reg:linear', gamma=0,subsample=1, colsample_bytree=1, colsample_bylevel=1, reg_alpha=0, reg_lambda=1, scale_pos_weight=1, base_score=0.5, missing=None)
+xgboost_throughput = xgb.XGBRegressor(silent=True, objective='reg:linear', gamma=0, subsample=1, colsample_bytree=1,
+                                      colsample_bylevel=1, reg_alpha=0, reg_lambda=1, scale_pos_weight=1,
+                                      base_score=0.5, missing=None)
 
 xgboost_best_model_throughput = GridSearchCV(xgboost_throughput, parameters_xgboost_throughput, n_jobs=1,
                                              cv=10, refit=True, return_train_score=True)
@@ -192,25 +207,25 @@ print (time.time()-time2)
 ##################################################################################
 
 
-##################################################################################
+#################################################################################
 print "\n\n\nlatency "
 
 data_split_latency_svr = np.array([], dtype='float64')
 data_split_latency_svr = data_reader(csv_file=summary_data, total_row=n_rows, thousands_splitter=t_splitter,
                                      csv_select_columns=csv_select_cols,
                                      x_column_numbers=x_select_cols_latency_svr,
-                                     y_column_number=y_select_col_latency)
+                                     y_column_number=y_select_col_latency, values=values_latency)
 
 data_split_latency_svr_test = np.array([], dtype='float64')
 data_split_latency_svr_test = data_reader(csv_file=summary_data_test, total_row=n_rows,
                                           thousands_splitter=t_splitter,
                                           csv_select_columns=csv_select_cols,
                                           x_column_numbers=x_select_cols_latency_svr,
-                                          y_column_number=y_select_col_latency)
+                                          y_column_number=y_select_col_latency, values=values_latency)
 
-##################################################################################
+##############################################################################
 print "\n\n\nSVR Grid Search CV latency"
-parameters_svr_latency = {} # 'kernel': ['rbf', 'poly', 'linear'], 'C': [1E2, 1E3], 'epsilon': [0.0001, 0.0005, 0.001, 0.005,  0.01, 0.05, 0.1, 0.5, 10]
+parameters_svr_latency = {'kernel': ['rbf'], 'C': [1E6], 'epsilon': [0.0001, 0.0005, 0.001, 0.005,  0.01, 0.05, 0.1]}
 
 svr_latency = SVR(coef0=0.1, tol=0.001, shrinking=True, cache_size=200, verbose=False, max_iter=-1)
 
@@ -235,19 +250,19 @@ data_split_latency_xgboost = np.array([], dtype='float64')
 data_split_latency_xgboost = data_reader(csv_file=summary_data, total_row=n_rows, thousands_splitter=t_splitter,
                                             csv_select_columns=csv_select_cols,
                                             x_column_numbers=x_select_cols_latency_xgboost,
-                                            y_column_number=y_select_col_latency)
+                                            y_column_number=y_select_col_latency, values=values_latency)
 
 data_split_latency_xgboost_test = np.array([], dtype='float64')
 data_split_latency_xgboost_test = data_reader(csv_file=summary_data_test, total_row=n_rows,
                                                  thousands_splitter=t_splitter, csv_select_columns=csv_select_cols,
                                                  x_column_numbers=x_select_cols_latency_xgboost,
-                                                 y_column_number=y_select_col_latency)
+                                                 y_column_number=y_select_col_latency, values=values_latency)
 
-#############################################################################
-parameters_xgboost_latency = {} # 'max_depth': [4], 'learning_rate': [0.1], 'n_estimators': [600], 'min_child_weight': [2], 'max_delta_step': [0], 'objective': ['reg:linear']
+#########################################################################
+parameters_xgboost_latency = {'max_depth': [15], 'learning_rate': [0.075], 'n_estimators': [600], 'min_child_weight': [1], 'max_delta_step': [0], 'objective': ['reg:linear']}
 
 xgboost_latency = xgb.XGBRegressor(silent=True, objective='reg:linear', gamma=0,
-                                   subsample=1, colsample_bytree=1, colsample_bylevel=1,
+                                   subsample=0.9, colsample_bytree=1, colsample_bylevel=1,
                                    reg_alpha=0, reg_lambda=1, scale_pos_weight=1,
                                    base_score=0.5, missing=None)
 
@@ -268,7 +283,7 @@ print array_print(evaluator(data_split_latency_xgboost[1],
                             xgboost_best_latency.predict(data_split_latency_xgboost[0])))
 print array_print(evaluator(data_split_latency_xgboost_test[1],
                             xgboost_best_latency.predict(data_split_latency_xgboost_test[0])))
-
+print xgboost_best_latency.best_params_
 print (time.time()-time2)
 #########################################################################
 
@@ -280,19 +295,18 @@ data_split_90th_percentile_svr = np.array([], dtype='float64')
 data_split_90th_percentile_svr = data_reader(csv_file=summary_data, total_row=n_rows, thousands_splitter=t_splitter,
                                      csv_select_columns=csv_select_cols,
                                      x_column_numbers=x_select_cols_90th_percentile_svr,
-                                     y_column_number=y_select_col_90th_percentile)
+                                     y_column_number=y_select_col_90th_percentile, values=values_90th)
 
 data_split_90th_percentile_svr_test = np.array([], dtype='float64')
 data_split_90th_percentile_svr_test = data_reader(csv_file=summary_data_test, total_row=n_rows,
                                           thousands_splitter=t_splitter,
                                           csv_select_columns=csv_select_cols,
                                           x_column_numbers=x_select_cols_90th_percentile_svr,
-                                          y_column_number=y_select_col_90th_percentile)
+                                          y_column_number=y_select_col_90th_percentile, values=values_90th)
 
-
- ################################################################################
+##############################################################################
 print "\n\n\nSVR Grid Search CV 90th_percentile"
-parameters_svr_90th_percentile = {} # 'kernel': ['rbf', 'linear'], 'C': [1E2, 1E3], 'epsilon': [0.0001, 0.0005, 0.001, 0.005,  0.01, 0.05, 0.1, 0.5, 10]
+parameters_svr_90th_percentile = {'kernel': ['rbf', 'linear'], 'C': [1E6], 'epsilon': [0.001, 0.005,  0.01, 0.05, 0.1, 0.5]}
 
 svr_90th_percentile = SVR(coef0=0.1, tol=0.001, shrinking=True, cache_size=200, verbose=False, max_iter=-1)
 
@@ -313,24 +327,24 @@ print 'time', time.time()-time2
 ###########################################################################
 
 
- ###########################################################################
+#########################################################################
 print "\n\n\nXGBoost Grid Search CV 90th_percentile "
 data_split_90th_percentile_xgboost = np.array([], dtype='float64')
 data_split_90th_percentile_xgboost = data_reader(csv_file=summary_data, total_row=n_rows, thousands_splitter=t_splitter,
                                             csv_select_columns=csv_select_cols,
                                             x_column_numbers=x_select_cols_90th_percentile_xgboost,
-                                            y_column_number=y_select_col_90th_percentile)
+                                            y_column_number=y_select_col_90th_percentile, values= values_90th)
 
 data_split_90th_percentile_xgboost_test = np.array([], dtype='float64')
 data_split_90th_percentile_xgboost_test = data_reader(csv_file=summary_data_test, total_row=n_rows,
                                                  thousands_splitter=t_splitter, csv_select_columns=csv_select_cols,
                                                  x_column_numbers=x_select_cols_90th_percentile_xgboost,
-                                                 y_column_number=y_select_col_90th_percentile)
+                                                 y_column_number=y_select_col_90th_percentile, values=values_90th)
 
-parameters_xgboost_90th_percentile = {} # 'max_depth': [10], 'learning_rate': [0.004], 'n_estimators': [1000], 'min_child_weight': [2], 'max_delta_step': [0], 'objective': ['reg:linear']
+parameters_xgboost_90th_percentile = {'max_depth': [15], 'learning_rate': [0.008], 'n_estimators': [400], 'min_child_weight': [1], 'max_delta_step': [0], 'objective': ['reg:linear']}
 
 xgboost_90th_percentile = xgb.XGBRegressor(silent=True, objective='reg:linear', gamma=0,
-                                   subsample=1, colsample_bytree=1, colsample_bylevel=1,
+                                   subsample=0.9, colsample_bytree=1, colsample_bylevel=1,
                                    reg_alpha=0, reg_lambda=1, scale_pos_weight=1,
                                    base_score=0.5, missing=None)
 
@@ -363,18 +377,18 @@ data_split_95th_percentile_svr = np.array([], dtype='float64')
 data_split_95th_percentile_svr = data_reader(csv_file=summary_data, total_row=n_rows, thousands_splitter=t_splitter,
                                      csv_select_columns=csv_select_cols,
                                      x_column_numbers=x_select_cols_95th_percentile_svr,
-                                     y_column_number=y_select_col_95th_percentile)
+                                     y_column_number=y_select_col_95th_percentile, values=values_95th)
 
 data_split_95th_percentile_svr_test = np.array([], dtype='float64')
 data_split_95th_percentile_svr_test = data_reader(csv_file=summary_data_test, total_row=n_rows,
                                           thousands_splitter=t_splitter,
                                           csv_select_columns=csv_select_cols,
                                           x_column_numbers=x_select_cols_95th_percentile_svr,
-                                          y_column_number=y_select_col_95th_percentile)
+                                          y_column_number=y_select_col_95th_percentile, values=values_95th)
 
- ###############################################################################
+##############################################################################
 print "\n\n\nSVR Grid Search CV 95th_percentile"
-parameters_svr_95th_percentile = {} # 'kernel': ['rbf', 'poly', 'linear'], 'C': [1E2, 1E3], 'epsilon': [0.0001, 0.0005, 0.001, 0.005,  0.01, 0.05, 0.1, 0.5, 10]
+parameters_svr_95th_percentile = {'kernel': ['rbf'], 'C': [1E7], 'epsilon': [0.0001, 0.0005, 0.001, 0.005,  0.01, 0.05, 0.1, 0.5, 10]}
 
 svr_95th_percentile = SVR(coef0=0.1, tol=0.001, shrinking=True, cache_size=200, verbose=False, max_iter=-1)
 
@@ -399,18 +413,18 @@ data_split_95th_percentile_xgboost = np.array([], dtype='float64')
 data_split_95th_percentile_xgboost = data_reader(csv_file=summary_data, total_row=n_rows, thousands_splitter=t_splitter,
                                             csv_select_columns=csv_select_cols,
                                             x_column_numbers=x_select_cols_95th_percentile_xgboost,
-                                            y_column_number=y_select_col_95th_percentile)
+                                            y_column_number=y_select_col_95th_percentile, values=values_95th)
 
 data_split_95th_percentile_xgboost_test = np.array([], dtype='float64')
 data_split_95th_percentile_xgboost_test = data_reader(csv_file=summary_data_test, total_row=n_rows,
                                                  thousands_splitter=t_splitter, csv_select_columns=csv_select_cols,
                                                  x_column_numbers=x_select_cols_95th_percentile_xgboost,
-                                                 y_column_number=y_select_col_95th_percentile)
+                                                 y_column_number=y_select_col_95th_percentile, values=values_95th)
 
-parameters_xgboost_95th_percentile = {} # 'max_depth': [5], 'learning_rate': [0.033], 'n_estimators': [800], 'min_child_weight': [2], 'max_delta_step': [0], 'objective': ['reg:linear']
+parameters_xgboost_95th_percentile = {'max_depth': [8], 'learning_rate': [0.169], 'n_estimators': [400], 'min_child_weight': [2], 'max_delta_step': [0], 'objective': ['reg:linear']}
 
 xgboost_95th_percentile = xgb.XGBRegressor(silent=True, objective='reg:linear', gamma=0,
-                                   subsample=1, colsample_bytree=1, colsample_bylevel=1,
+                                   subsample=0.9, colsample_bytree=1, colsample_bylevel=1,
                                    reg_alpha=0, reg_lambda=1, scale_pos_weight=1,
                                    base_score=0.5, missing=None)
 
@@ -433,28 +447,28 @@ print array_print(evaluator(data_split_95th_percentile_xgboost_test[1],
                             xgboost_best_95th_percentile.predict(data_split_95th_percentile_xgboost_test[0])))
 
 print (time.time()-time2)
-# ###########################################################################
+###########################################################################
 
 
-# ###################################################################################
+###################################################################################
 print "\n\n\n99th_percentile "
 
 data_split_99th_percentile_svr = np.array([], dtype='float64')
 data_split_99th_percentile_svr = data_reader(csv_file=summary_data, total_row=n_rows, thousands_splitter=t_splitter,
                                      csv_select_columns=csv_select_cols,
                                      x_column_numbers=x_select_cols_99th_percentile_svr,
-                                     y_column_number=y_select_col_99th_percentile)
+                                     y_column_number=y_select_col_99th_percentile,values=values_99th)
 
 data_split_99th_percentile_svr_test = np.array([], dtype='float64')
 data_split_99th_percentile_svr_test = data_reader(csv_file=summary_data_test, total_row=n_rows,
                                           thousands_splitter=t_splitter,
                                           csv_select_columns=csv_select_cols,
                                           x_column_numbers=x_select_cols_99th_percentile_svr,
-                                          y_column_number=y_select_col_99th_percentile)
+                                          y_column_number=y_select_col_99th_percentile, values=values_99th)
 
- ################################################################################
+# ################################################################################
 print "\n\n\nSVR Grid Search CV 99th_percentile"
-parameters_svr_99th_percentile = {} # 'kernel': ['rbf', 'poly', 'linear'], 'C': [1E2, 1E3], 'epsilon': [0.0001, 0.0005, 0.001, 0.005,  0.01, 0.05, 0.1, 0.5, 10]
+parameters_svr_99th_percentile = {'kernel': ['rbf', 'poly', 'linear'], 'C': [1E7], 'epsilon': [0.0001, 0.0005, 0.001, 0.005,  0.01, 0.05, 0.1, 0.5, 10]}
 
 svr_99th_percentile = SVR(coef0=0.1, tol=0.001, shrinking=True, cache_size=200, verbose=False, max_iter=-1)
 
@@ -479,15 +493,15 @@ data_split_99th_percentile_xgboost = np.array([], dtype='float64')
 data_split_99th_percentile_xgboost = data_reader(csv_file=summary_data, total_row=n_rows, thousands_splitter=t_splitter,
                                             csv_select_columns=csv_select_cols,
                                             x_column_numbers=x_select_cols_99th_percentile_xgboost,
-                                            y_column_number=y_select_col_99th_percentile)
+                                            y_column_number=y_select_col_99th_percentile, values=values_99th)
 
 data_split_99th_percentile_xgboost_test = np.array([], dtype='float64')
 data_split_99th_percentile_xgboost_test = data_reader(csv_file=summary_data_test, total_row=n_rows,
                                                  thousands_splitter=t_splitter, csv_select_columns=csv_select_cols,
                                                  x_column_numbers=x_select_cols_99th_percentile_xgboost,
-                                                 y_column_number=y_select_col_99th_percentile)
+                                                 y_column_number=y_select_col_99th_percentile, values=values_99th)
 
-parameters_xgboost_99th_percentile = {} # 'max_depth': [7], 'learning_rate': [0.03], 'n_estimators': [400], 'min_child_weight': [2], 'max_delta_step': [0], 'objective': ['reg:linear']
+parameters_xgboost_99th_percentile = {'max_depth': [16], 'learning_rate': [0.093], 'n_estimators': [600], 'min_child_weight': [2], 'max_delta_step': [0], 'objective': ['reg:linear']}
 
 xgboost_99th_percentile = xgb.XGBRegressor(silent=True, objective='reg:linear', gamma=0,
                                    subsample=1, colsample_bytree=1, colsample_bylevel=1,
@@ -513,4 +527,4 @@ print array_print(evaluator(data_split_99th_percentile_xgboost_test[1],
                             xgboost_best_99th_percentile.predict(data_split_99th_percentile_xgboost_test[0])))
 
 print (time.time()-time2)
-#  #########################################################################
+#########################################################################
